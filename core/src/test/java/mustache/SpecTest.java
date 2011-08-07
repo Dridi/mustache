@@ -35,7 +35,8 @@ public class SpecTest implements PartialLoader {
 	
 	@Test
 	public void parserShouldComplyWithSpecs() throws ParseException {
-		Parser parser = new Parser(testCase.getTemplate(), testCase.getData(), this);
+		Context context = Context.newInstance( testCase.getData() );
+		Parser parser = new Parser(testCase.getTemplate(), context, this);
 		Assert.assertEquals(testCase.toString(), testCase.getExpected(), parser.merge());
 	}
 	

@@ -4,20 +4,21 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 public class Parser {
 	
-	private Stream stream;
+	private final Stream stream;
 	
-	private SectionStack sectionStack;
+	private final SectionStack sectionStack;
 	
-	private PartialLoader partialLoader;
+	private final PartialLoader partialLoader;
 	
-	private StringBuilder output = new StringBuilder();
+	private final StringBuilder output;
 	
 	private boolean rendering = false;
 	
-	public Parser(String input, Object context, PartialLoader partialLoader) {
+	public Parser(String input, Context context, PartialLoader partialLoader) {
 		this.stream = new Stream(input);
 		this.sectionStack = new SectionStack(context);
 		this.partialLoader = partialLoader;
+		this.output = new StringBuilder();
 	}
 	
 	public String merge() throws ParseException {
@@ -28,7 +29,7 @@ public class Parser {
 		}
 		
 		if (sectionStack.size() > 1) {
-			String message = "Section not closed : " + sectionStack.section().getName();
+			String message = "Section not closed : " + sectionStack.section();
 			throw ParseException.fromPosition(message, stream.getPosition());
 		}
 		
@@ -60,7 +61,7 @@ public class Parser {
 		
 		switch (tag.getType()) {
 		case VARIABLE:
-			appendString(StringEscapeUtils.escapeHtml( sectionStack.getVariable(tag).toString()));
+			appendString(StringEscapeUtils.escapeHtml( sectionStack.getVariable(tag).toString() ));
 			break;
 		case UNESCAPED_VARIABLE:
 			appendString(sectionStack.getVariable(tag));
@@ -88,18 +89,16 @@ public class Parser {
 	}
 	
 	private void closeSection(Tag tag) throws ParseException {
-		if (!tag.getContent().equals(sectionStack.section().getName())) {
-			throw ParseException.fromTag("Unexpexted section close : " + tag.getContent(), tag);
-		}
-		
-		stream.rewind(sectionStack.closeSection());
+		String sectionName = tag.getContent();
+		Position position = sectionStack.closeSection(sectionName);
+		stream.rewind(position);
 	}
 	
 	private void renderPartial(Tag tag) throws ParseException {
 		if (sectionStack.section().isRendered()) {
 			String partial = loadPartial(tag);
 			
-			Parser parser = new Parser(partial, sectionStack.section().context(), partialLoader);
+			Parser parser = new Parser(partial, sectionStack.section().currentContext(), partialLoader);
 			appendString(parser.merge());
 		}
 	}
@@ -115,8 +114,8 @@ public class Parser {
 	}
 	
 	private void changeDelimiter(Tag tag) throws ParseException {
-		if (sectionStack.section().getName() != null) {
-			String message = "Unexpected delimiter change within a section : " + sectionStack.section().getName();
+		if ( !sectionStack.section().isRoot() ) {
+			String message = "Unexpected delimiter change within a section : " + sectionStack.section();
 			throw ParseException.fromTag(message, tag);
 		}
 		

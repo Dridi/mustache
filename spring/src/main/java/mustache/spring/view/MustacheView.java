@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mustache.Context;
 import mustache.ParseException;
 import mustache.Parser;
 import mustache.PartialLoader;
@@ -44,7 +45,7 @@ public class MustacheView extends AbstractTemplateView {
 			HttpServletRequest request, HttpServletResponse response) throws IOException, ParseException {
 		
 		String template = loadTemplate();
-		Parser parser = new Parser(template, model, partialLoader);
+		Parser parser = new Parser(template, Context.newInstance(model), partialLoader);
 		
 		response.getWriter().append( parser.merge() );
 	}

@@ -1,10 +1,7 @@
 package mustache;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 class Section {
 	
@@ -14,109 +11,67 @@ class Section {
 	
 	private String name;
 	
-	private List<Object> contexts = new ArrayList<Object>();
+	private List<Context> contexts = new ArrayList<Context>();
 	
-	Object context() {
+	Context currentContext() {
 		return contexts.get(0);
 	}
 	
-	void popContext() {
+	Object interpolateVariable(String variable) {
+		return currentContext().interpolate(variable);
+	}
+	
+	boolean hasVariable(String variable) {
+		return currentContext().hasBaseVariable(variable);
+	}
+	
+	Position close(String name) throws ParseException {
+		
+		if (this.name == null && name != null || !this.name.equals(name)) {
+			throw ParseException.fromPosition("Invalid section close : " + name, position);
+		}
+		
+		if (contexts.size() == 0) {
+			throw new IllegalStateException("Section closed for good");
+		}
+		
 		contexts.remove(0);
+		return contexts.size() > 0 ? position : null;
 	}
 	
-	public int size() {
-		return contexts.size();
-	}
-	
-	Object interpolateVariable(String[] parts) {
-		Object value = context();
-		
-		for (String part : parts) {
-			
-			if (!hasVariable(part, value)) {
-				return "";
-			}
-			
-			value = getValue(part, value);
-		}
-		
-		return value;
-	}
-	
-	boolean hasVariable(String property) {
-		return hasVariable(property, context());
-	}
-	
-	private boolean hasVariable(String property, Object object) {
-		
-		if (object == null || object.getClass().isArray() || object instanceof Collection) {
-			return false;
-		}
-		
-		if (object instanceof Map) {
-			return ((Map<?, ?>) object).containsKey(property);
-		}
-		
-		try {
-			object.getClass().getDeclaredField(property);
-			return true;
-		}
-		catch (NoSuchFieldException e) {
-			return false;
-		}
-	}
-	
-	private Object getValue(String property, Object object) {
-		
-		if (object instanceof Map) {
-			return ((Map<?, ?>) object).get(property);
-		}
-		
-		try {
-			Field field = object.getClass().getDeclaredField(property);
-			field.setAccessible(true);
-			return field.get(object);
-		}
-		catch (NoSuchFieldException e) {
-			return false;
-		}
-		catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-	
-	static Section newRootSection(Object context) {
+	static Section newRootSection(Context context) {
 		Section section = new Section();
 		section.contexts.add(context);
 		return section;
 	}
 	
-	static Section newNestedSection(Tag tag, boolean rendered, List<Object> contexts) {
+	static Section newNestedSection(Tag tag, boolean rendered, List<Object> data) {
 		Section section = new Section();
 		
 		section.rendered = rendered;
 		section.position = tag.forward();
 		section.name = tag.getContent();
 		
-		if (rendered && contexts != null) {
-			section.contexts.addAll(contexts);
+		if (rendered && data != null) {
+			section.contexts.addAll( Context.newInstances(data) );
 		}
 		else {
-			section.contexts.add(null);
+			section.contexts.add( Context.newInstance(null) );
 		}
 		
 		return section;
 	}
 	
-	Position getPosition() {
-		return position;
-	}
-	
 	boolean isRendered() {
 		return rendered;
 	}
-	
-	String getName() {
-		return name;
+
+	public boolean isRoot() {
+		return name == null;
+	}
+
+	@Override
+	public String toString() {
+		return "Section " + name + " at " + position;
 	}
 }

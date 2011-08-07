@@ -5,18 +5,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 class SectionStack {
 	
-	private static final String VARIABLE_REGEX = "^\\s*(\\.|([a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)*))\\s*$";
-
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile(VARIABLE_REGEX, Pattern.CASE_INSENSITIVE);
-	
 	List<Section> sections = new ArrayList<Section>();
 	
-	SectionStack(Object context) {
+	SectionStack(Context context) {
 		sections.add(Section.newRootSection(context));
 	}
 	
@@ -37,19 +31,13 @@ class SectionStack {
 	}
 	
 	Object getVariable(Tag tag) throws ParseException {
-		String variableName = getVariableName(tag);
 		
-		if (".".equals(variableName)) {
-			Object context = section().context();
-			return context != null ? context : "";
-		}
-		
-		String[] parts = variableName.split("\\.");
-		String baseName = parts[0];
+		String variable = getVariableName(tag);
 		
 		for (Section section : sections) {
-			if (section.hasVariable(baseName)) {
-				return section.interpolateVariable(parts);
+			if (section.hasVariable(variable)) {
+				Object context = section.interpolateVariable(variable);
+				return context != null ? context : "";
 			}
 		}
 		
@@ -64,7 +52,7 @@ class SectionStack {
 		}
 		else if (value instanceof Boolean) {
 			Boolean bool = (Boolean) value;
-			push(tag, bool.booleanValue(), Arrays.asList(section().context()));
+			push(tag, bool.booleanValue(), null);
 		}
 		else if (value.getClass().isArray()) {
 			Object[] values = (Object[]) value;
@@ -86,7 +74,7 @@ class SectionStack {
 		Object value = getVariable(tag);
 		
 		if (section().isRendered()) {
-			push(tag, isEmpty(value), Arrays.asList(section().context()));
+			push(tag, isEmpty(value), null);
 		}
 		else {
 			push(tag, false);
@@ -94,13 +82,14 @@ class SectionStack {
 	}
 	
 	private String getVariableName(Tag tag) throws ParseException {
-		Matcher matcher = VARIABLE_PATTERN.matcher(tag.getContent());
 		
-		if (!matcher.matches()) {
-			throw ParseException.fromTag("Illegal variable name : " + tag.getContent(), tag);
+		String variableName = tag.getContent().trim();
+		
+		if ( !Context.isValidQuery(variableName) ) {
+			throw ParseException.fromTag("Illegal variable name : " + variableName, tag);
 		}
 		
-		return matcher.group(1);
+		return variableName;
 	}
 	
 	private boolean isEmpty(Object value) {
@@ -128,16 +117,13 @@ class SectionStack {
 		return false;
 	}
 	
-	Position closeSection() {
-		Section section = section();
+	Position closeSection(String name) throws ParseException {
+		Position position = section().close(name);
 		
-		if (section.size() > 1) {
-			section.popContext();
-			return section.getPosition();
+		if (position == null) {
+			sections.remove(0);
 		}
 		
-		sections.remove(0);
-		return null;
+		return position;
 	}
-	
 }
