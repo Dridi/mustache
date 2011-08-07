@@ -52,7 +52,7 @@ final class Tag {
 	}
 	
 	/**
-	 * The different types of Tag.
+	 * The different kinds of <code>Tag</code>.
 	 */
 	enum Type {
 		VARIABLE(""),
@@ -84,6 +84,7 @@ final class Tag {
 		 * Indicates whether the Tag can be considered standalone (the only item on a line).
 		 * 
 		 * @return <code>true</code> if the tag can be standalone
+		 * @exception IllegalArgumentException if the token is unknown
 		 */
 		boolean canBeStandalone() {
 			return standalone;
@@ -99,7 +100,7 @@ final class Tag {
 				}
 			}
 			
-			throw new IllegalArgumentException("Illegal token : " + token);
+			throw new IllegalArgumentException("Unknown token : " + token);
 		}
 	}
 	
