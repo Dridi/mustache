@@ -3,7 +3,7 @@
 		<extends organisation="mustache" module="mustache" revision="latest.revision" />
 		<description>Core API for {{Mustache}} templates rendering.</description>
 		<ea:build module="build-std-java" revision="0.2">
-			<ea:property name="test.run.includes.pattern" value="**/*Test.class"/>
+			<ea:property name="test.integration.run.includes.pattern" value="**/*Test.class"/>
 		</ea:build>
 	</info>
 	<dependencies>
