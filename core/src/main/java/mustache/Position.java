@@ -3,8 +3,9 @@ package mustache;
 import java.text.MessageFormat;
 
 /**
- * Represents a position in a template. Instances of this class are immutable and safe for use by multiple concurrent
- * threads.
+ * Represents a position in a template. Line and column numbers are calculated
+ * according to line feeds only. Instances of this class are immutable and safe
+ * for use by multiple concurrent threads.
  * 
  * @author Dri
  */
