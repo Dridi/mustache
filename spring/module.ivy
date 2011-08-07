@@ -1,18 +1,12 @@
 <ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra" xmlns:ea="http://www.easyant.org">
-	<info organisation="mustache" module="mustache-spring" status="integration">
-		<extends organisation="mustache" module="mustache" revision="latest.integration" />
+	<info organisation="mustache" module="mustache-spring" revision="1.0.0" status="integration">
+		<extends organisation="mustache" module="mustache" revision="latest.revision" />
 		<description>Spring Web MVC Integration for {{Mustache}} templates rendering.</description>
-		<ea:build organisation="org.apache.easyant.buildtypes" module="build-std-java" revision="0.2">
-			<ea:property name="test.framework" value="junit"/>
-		</ea:build>
+		<ea:build module="build-std-java" revision="0.2"/>
 	</info>
-	<publications>
-		<artifact type="jar"/>
-		<artifact e:classifier="source"/>
-		<artifact e:classifier="javadoc"/>
-	</publications>
 	<dependencies>
-		<dependency org="mustache" name="mustache-core" rev="latest.integration" conf="default->default"/>
-		<dependency org="org.springframework" name="spring-webmvc" rev="3.0.5.RELEASE"/>
+		<dependency org="mustache" name="mustache-core" rev="latest.revision" conf="default->default"/>
+		<dependency org="org.springframework" name="spring-webmvc" rev="3.0.+" conf="default->default"/>
+		<dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="default->default"/>
 	</dependencies>
 </ivy-module>
