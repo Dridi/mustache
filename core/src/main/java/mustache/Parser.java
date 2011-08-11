@@ -2,6 +2,9 @@ package mustache;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import mustache.core.Context;
+import mustache.core.Position;
+
 public class Parser {
 	
 	private final Stream stream;

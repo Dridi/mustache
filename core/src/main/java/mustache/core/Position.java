@@ -1,4 +1,4 @@
-package mustache;
+package mustache.core;
 
 import java.text.MessageFormat;
 
@@ -9,12 +9,12 @@ import java.text.MessageFormat;
  * 
  * @author Dri
  */
-final class Position {
+public final class Position {
 	
 	/**
 	 * The initial position (ie. line 1, column 1).
 	 */
-	static final Position START = new Position();
+	public static final Position START = new Position();
 	
 	private int offset = 0;
 	
@@ -32,7 +32,7 @@ final class Position {
 	 * @param line The line number {@code >= 1}
 	 * @param column The column number {@code >= 1}
 	 */
-	Position(int offset, int line, int column) {
+	public Position(int offset, int line, int column) {
 		this.offset = offset;
 		this.line = line;
 		this.column = column;
@@ -41,21 +41,21 @@ final class Position {
 	/**
 	 * @return the offset
 	 */
-	int offset() {
+	public int offset() {
 		return offset;
 	}
 	
 	/**
 	 * @return the line number
 	 */
-	int line() {
+	public int line() {
 		return line;
 	}
 	
 	/**
 	 * @return the column number
 	 */
-	int column() {
+	public int column() {
 		return column;
 	}
 	
@@ -65,7 +65,7 @@ final class Position {
 	 * @param text The text to move through
 	 * @return The position after <code>this</code> and <code>text</code>
 	 */
-	Position forward(String text) {
+	public Position forward(String text) {
 		Position forward = new Position();
 		
 		forward.offset = offset + text.length();
@@ -92,7 +92,6 @@ final class Position {
 		}
 		
 		return count;
-		// return text.replaceAll("[^\\n]", "").length();
 	}
 	
 	/**

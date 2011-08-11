@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Assert;
+import mustache.core.Context;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

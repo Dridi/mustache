@@ -1,5 +1,7 @@
 package mustache;
 
+import mustache.core.Position;
+
 /**
  * Represents a tag in a template.
  * 

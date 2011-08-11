@@ -2,6 +2,8 @@ package mustache;
 
 import java.text.MessageFormat;
 
+import mustache.core.Position;
+
 /**
  * Thrown to indicate a syntax error in a Mustache template.
  * 

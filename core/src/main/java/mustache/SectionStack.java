@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import mustache.core.Context;
+import mustache.core.Position;
+
 class SectionStack {
 	
 	List<Section> sections = new ArrayList<Section>();

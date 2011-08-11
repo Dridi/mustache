@@ -3,6 +3,9 @@ package mustache;
 import java.util.ArrayList;
 import java.util.List;
 
+import mustache.core.Context;
+import mustache.core.Position;
+
 class Section {
 	
 	private Position position;

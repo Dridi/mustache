@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mustache.core.Position;
+
 class Stream {
 	
 	private static final String NORMAL_TAG_REGEX = "(?s){0}\\s*(&|#|\\^|/|\\>|\\=|\\!)?\\s*(.*?){1}";

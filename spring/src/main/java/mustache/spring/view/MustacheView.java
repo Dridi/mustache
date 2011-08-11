@@ -7,10 +7,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mustache.Context;
 import mustache.ParseException;
 import mustache.Parser;
 import mustache.PartialLoader;
+import mustache.core.Context;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
