@@ -15,23 +15,35 @@ public final class Sequencer {
 		if (instruction == null) {
 			throw new NullPointerException();
 		}
+		
 		updateSectionStack(instruction);
 		sequence.add(instruction);
+		
 		return this;
 	}
 	
 	private void updateSectionStack(Instruction instruction) {
 		if ( instruction.getType().opening() ) {
-			sections.add( instruction.getData() );
+			sections.addFirst( instruction.getData() );
 		}
 		else if( instruction.getType().closing() ) {
 			closeSection( instruction.getData() );
 		}
 	}
 
-	private void closeSection(String data) {
-		// TODO Auto-generated method stub
+	private void closeSection(String section) {
+		if ( sections.isEmpty() ) {
+			throw new IllegalStateException("No section currently open, cannot close " + section);
+		}
 		
+		String current = sections.peekFirst();
+		
+		if ( current.equals(section) ) {
+			sections.removeFirst();
+		}
+		else {
+			throw new IllegalStateException("Expected to close " + current + " not " + section);
+		}
 	}
 
 	public Sequencer addAll(List<Instruction> instructions) {
