@@ -21,6 +21,15 @@ public final class Sequencer {
 	}
 	
 	private void updateSectionStack(Instruction instruction) {
+		if ( instruction.getType().opening() ) {
+			sections.add( instruction.getData() );
+		}
+		else if( instruction.getType().closing() ) {
+			closeSection( instruction.getData() );
+		}
+	}
+
+	private void closeSection(String data) {
 		// TODO Auto-generated method stub
 		
 	}
