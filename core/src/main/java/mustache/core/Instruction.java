@@ -73,6 +73,14 @@ public final class Instruction implements Serializable {
 	public String getData() {
 		return data;
 	}
+	
+	/**
+	 * @return the {@code Instruction} {@link Type} name
+	 */
+	@Override
+	public String toString() {
+		return type.name();
+	}
 
 	private Object writeReplace() {
 		return new SerializationProxy(this);
