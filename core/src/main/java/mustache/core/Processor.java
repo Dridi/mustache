@@ -36,12 +36,18 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		closingSection = null;
 	}
 	
-	public void enterSection(String name) {
-		// TODO Auto-generated method stub
+	public void enterSection(String section) {
+		if ( !openingSection.equals(section) ) {
+			throw new IllegalArgumentException("Expected to enter " + openingSection + " not " + section);
+		}
+		openingSection = null;
 	}
 	
-	public void exitSection(String name) {
-		// TODO Auto-generated method stub
+	public void exitSection(String section) {
+		if ( !closingSection.equals(section) ) {
+			throw new IllegalArgumentException("Expected to exit " + closingSection + " not " + section);
+		}
+		openingSection = null;
 	}
 
 	@Override
