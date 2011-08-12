@@ -65,12 +65,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		Instruction instruction = sequence.get(currentPosition);
 		
-		switch ( instruction.getType() ) {
-		case OPEN_SECTION:
-		case OPEN_INVERTED_SECTION:
+		if ( instruction.getType().opening() ) {
 			openingSection = instruction.getData();
-			break;
-		case CLOSE_SECTION:
+		}
+		else if ( instruction.getType().closing() ) {
 			closingSection = instruction.getData();
 		}
 		

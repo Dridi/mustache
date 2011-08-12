@@ -31,6 +31,14 @@ public final class Instruction implements Serializable {
 		OPEN_SECTION,
 		OPEN_INVERTED_SECTION,
 		CLOSE_SECTION;
+		
+		public boolean opening() {
+			return this == OPEN_SECTION || this == OPEN_INVERTED_SECTION;
+		}
+		
+		public boolean closing() {
+			return this == CLOSE_SECTION;
+		}
 	}
 	
 	private final Type type;
