@@ -99,7 +99,7 @@ public final class Instruction implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return type.name();
+		return "Instruction " + type.name();
 	}
 
 	private Object writeReplace() {
