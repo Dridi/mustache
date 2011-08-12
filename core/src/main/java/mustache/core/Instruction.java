@@ -57,6 +57,10 @@ public final class Instruction implements Serializable {
 			throw new NullPointerException();
 		}
 		
+		if (type != Type.APPEND_TEXT && !Context.isValidQuery(data)) {
+			throw new IllegalArgumentException("Invalid interpolation : " + data);
+		}
+		
 		return new Instruction(type, data);
 	}
 	
