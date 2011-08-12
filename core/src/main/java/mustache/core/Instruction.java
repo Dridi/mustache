@@ -18,13 +18,12 @@ public final class Instruction implements Serializable {
 	/**
 	 * A reusable <i>no operation performed</i> {@code Instruction}.
 	 */
-	public static final Instruction NOP = new Instruction(Type.NOP, null);
+	public static final Instruction NOP = new Instruction(null, null);
 	
 	/**
 	 * The set of available instructions.
 	 */
 	public enum Type {
-		NOP,
 		APPEND_TEXT,
 		APPEND_VARIABLE,
 		APPEND_UNESCAPED_VARIABLE,
@@ -49,10 +48,6 @@ public final class Instruction implements Serializable {
 	 * @throws NullPointerException if {@code type} or {@code data} is {@code null}
 	 */
 	public static Instruction newInstance(Type type, String data) {
-		if (type == Type.NOP) {
-			return NOP;
-		}
-		
 		if (type == null || data == null) {
 			throw new NullPointerException();
 		}
@@ -99,7 +94,7 @@ public final class Instruction implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "Instruction " + type.name();
+		return "Instruction " + type;
 	}
 
 	private Object writeReplace() {
@@ -122,6 +117,9 @@ public final class Instruction implements Serializable {
 		}
 		
 		private Object readResolve() {
+			if (type == null && data == null) {
+				return Instruction.NOP;
+			}
 			return Instruction.newInstance(type, data);
 		}
 	}

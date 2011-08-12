@@ -78,6 +78,9 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private Instruction nextInstruction() {
+		// this is possible when skipping a section
+		// where the close instruction is the very
+		// last one in the sequence
 		if (currentPosition == sequence.size()) {
 			return Instruction.NOP;
 		}
