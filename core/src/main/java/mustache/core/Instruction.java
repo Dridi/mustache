@@ -31,14 +31,6 @@ public final class Instruction implements Serializable {
 		OPEN_SECTION,
 		OPEN_INVERTED_SECTION,
 		CLOSE_SECTION;
-		
-		public boolean opening() {
-			return this == OPEN_SECTION || this == OPEN_INVERTED_SECTION;
-		}
-		
-		public boolean closing() {
-			return this == CLOSE_SECTION;
-		}
 	}
 	
 	private final Type type;
@@ -66,6 +58,14 @@ public final class Instruction implements Serializable {
 		}
 		
 		return new Instruction(type, data);
+	}
+	
+	public boolean opening() {
+		return type == Type.OPEN_SECTION || type == Type.OPEN_INVERTED_SECTION;
+	}
+	
+	public boolean closing() {
+		return type == Type.CLOSE_SECTION;
 	}
 	
 	/**

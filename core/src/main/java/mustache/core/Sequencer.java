@@ -27,10 +27,10 @@ public final class Sequencer {
 	}
 	
 	private void updateSectionStack(Instruction instruction) throws SequenceException {
-		if ( instruction.getType().opening() ) {
+		if ( instruction.opening() ) {
 			sections.addFirst( instruction.getData() );
 		}
-		else if( instruction.getType().closing() ) {
+		else if( instruction.closing() ) {
 			closeSection( instruction.getData() );
 		}
 	}

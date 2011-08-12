@@ -76,10 +76,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		Instruction instruction = sequence.get(currentPosition);
 		
-		if ( instruction.getType().opening() ) {
+		if ( instruction.opening() ) {
 			openingSection = instruction.getData();
 		}
-		else if ( instruction.getType().closing() ) {
+		else if ( instruction.closing() ) {
 			closingSection = instruction.getData();
 		}
 		
@@ -87,13 +87,28 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private void reenterSection(String closingSection) {
-		// TODO Auto-generated method stub
 		
+		int openedSections = 1;
+		
+		while (openedSections > 0) {
+			currentPosition--;
+			openedSections -= openCloseDelta();
+		}
 	}
 
 	private void skipSection(String openingSection) {
-		// TODO Auto-generated method stub
 		
+		int openedSections = 1;
+		
+		while (openedSections > 0) {
+			currentPosition++;
+			openedSections += openCloseDelta();
+		}
+	}
+
+	private int openCloseDelta() {
+		Instruction instruction = sequence.get(currentPosition);
+		return instruction.opening() ? 1 : instruction.closing() ? -1 : 0;
 	}
 
 	@Override
