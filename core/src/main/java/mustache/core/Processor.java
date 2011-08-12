@@ -1,11 +1,16 @@
 package mustache.core;
 
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.util.Iterator;
 import java.util.List;
 
 public final class Processor implements Serializable, Iterator<Instruction> {
 	
+	private static final long serialVersionUID = 289040399110456725L;
+
 	private transient int currentPosition;
 	
 	private final List<Instruction> sequence;
@@ -17,7 +22,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		this.sequence = sequence;
 	}
 	
-	public static Processor fromSequence(Sequencer sequencer) {
+	public static Processor fromSequencer(Sequencer sequencer) {
 		if ( !sequencer.isProcessable() ) {
 			throw new IllegalArgumentException();
 		}
@@ -89,6 +94,31 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+
+	private Object writeReplace() {
+		return new SerializationProxy(this);
+	}
+
+	private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+		throw new InvalidObjectException("Proxy required");
+	}
+
+	private static class SerializationProxy implements Serializable {
+		private static final long serialVersionUID = 7682273649183979614L;
+		
+		private final List<Instruction> sequence;
+
+		SerializationProxy(Processor processor) {
+			this.sequence = processor.sequence;
+		}
+		
+		private Object readResolve() throws StreamCorruptedException {
+			try {
+				return Processor.fromSequencer( new Sequencer().addAll(sequence) );
+			} catch (SequenceException e) {
+				throw new StreamCorruptedException( e.getMessage() );
+			}
+		}
+	}
 	
-	// add SerializationProxy
 }
