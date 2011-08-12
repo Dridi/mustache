@@ -60,10 +60,18 @@ public final class Instruction implements Serializable {
 		return new Instruction(type, data);
 	}
 	
+	/**
+	 * Indicates whether this instruction intends to open a section.
+	 * @return {@code true} if it indicates a section opening
+	 */
 	public boolean opening() {
 		return type == Type.OPEN_SECTION || type == Type.OPEN_INVERTED_SECTION;
 	}
-	
+
+	/**
+	 * Indicates whether this instruction intends to close a section.
+	 * @return {@code true} if it indicates a section closing
+	 */
 	public boolean closing() {
 		return type == Type.CLOSE_SECTION;
 	}
