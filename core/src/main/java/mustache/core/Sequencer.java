@@ -16,6 +16,10 @@ public final class Sequencer {
 			throw new NullPointerException();
 		}
 		
+		if (instruction.getType() == Instruction.Type.NOP) {
+			throw new IllegalArgumentException("Un expected instruction " + instruction);
+		}
+		
 		updateSectionStack(instruction);
 		sequence.add(instruction);
 		
