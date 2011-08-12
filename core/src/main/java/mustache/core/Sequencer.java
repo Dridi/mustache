@@ -11,7 +11,7 @@ public final class Sequencer {
 	private Deque<String> sections = new ArrayDeque<String>();
 	private List<Instruction> sequence = new ArrayList<Instruction>();
 	
-	public Sequencer add(Instruction instruction) {
+	public Sequencer add(Instruction instruction) throws SequenceException {
 		if (instruction == null) {
 			throw new NullPointerException();
 		}
@@ -22,7 +22,7 @@ public final class Sequencer {
 		return this;
 	}
 	
-	private void updateSectionStack(Instruction instruction) {
+	private void updateSectionStack(Instruction instruction) throws SequenceException {
 		if ( instruction.getType().opening() ) {
 			sections.addFirst( instruction.getData() );
 		}
@@ -31,9 +31,9 @@ public final class Sequencer {
 		}
 	}
 
-	private void closeSection(String section) {
+	private void closeSection(String section) throws SequenceException {
 		if ( sections.isEmpty() ) {
-			throw new IllegalStateException("No section currently open, cannot close " + section);
+			throw new SequenceException("No section currently open, cannot close " + section);
 		}
 		
 		String current = sections.peekFirst();
@@ -42,11 +42,11 @@ public final class Sequencer {
 			sections.removeFirst();
 		}
 		else {
-			throw new IllegalStateException("Expected to close " + current + " not " + section);
+			throw new SequenceException("Expected to close " + current + " not " + section);
 		}
 	}
 
-	public Sequencer addAll(List<Instruction> instructions) {
+	public Sequencer addAll(List<Instruction> instructions) throws SequenceException {
 		for (Instruction instruction : instructions) {
 			add(instruction);
 		}
