@@ -1,24 +1,30 @@
 package mustache.core;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
-/**
- * candidates : linker, sequencer, assembler, compiler
- *
- */
 public final class Sequencer {
 
-	private List<Instruction> sequence;
+	private Deque<String> sections = new ArrayDeque<String>();
+	private List<Instruction> sequence = new ArrayList<Instruction>();
 	
 	public Sequencer add(Instruction instruction) {
-		// TODO checks
-		// TODO manage section stack
+		if (instruction == null) {
+			throw new NullPointerException();
+		}
+		updateSectionStack(instruction);
 		sequence.add(instruction);
 		return this;
 	}
 	
+	private void updateSectionStack(Instruction instruction) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public Sequencer addAll(List<Instruction> instructions) {
 		for (Instruction instruction : instructions) {
 			add(instruction);
@@ -27,7 +33,7 @@ public final class Sequencer {
 	}
 	
 	public boolean isProcessable() {
-		return false;
+		return sequence.size() > 0 && sections.size() == 0;
 	}
 	
 	public List<Instruction> getSequence() {
@@ -37,7 +43,7 @@ public final class Sequencer {
 	
 	public Sequencer clear() {
 		sequence.clear();
-		// TODO clear section stack
+		sections.clear();
 		return this;
 	}
 }
