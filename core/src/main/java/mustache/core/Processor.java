@@ -15,10 +15,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	private final List<Instruction> sequence;
 	
-	private transient boolean openingSection;
-	private transient boolean closingSection;
-	private transient boolean enterSection;
-	private transient boolean exitSection;
+	private transient boolean tryOpeningSection;
+	private transient boolean tryClosingSection;
 	
 	private Processor(List<Instruction> sequence) {
 		this.sequence = sequence;
@@ -26,7 +24,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	public static Processor fromSequencer(Sequencer sequencer) {
 		if ( !sequencer.isProcessable() ) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Sequence not processable");
 		}
 		
 		return new Processor( sequencer.getSequence() );
@@ -34,28 +32,24 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	public void reset() {
 		currentPosition = -1;
-		openingSection = false;
-		closingSection = false;
-		enterSection = false;
-		exitSection = false;
+		tryOpeningSection = false;
+		tryClosingSection = false;
 	}
 	
 	public void enterSection() {
-		if (openingSection == false) {
+		if (tryOpeningSection == false) {
 			throw new IllegalStateException("Unexpected attempt to enter a section.");
 		}
 		
-		openingSection = false;
-		enterSection = true;
+		tryOpeningSection = false;
 	}
 	
 	public void exitSection() {
-		if (closingSection == false) {
+		if (tryClosingSection == false) {
 			throw new IllegalStateException("Unexpected attempt to exit a section.");
 		}
 		
-		closingSection = false;
-		exitSection = true;
+		tryClosingSection = false;
 	}
 
 	@Override
@@ -65,10 +59,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 
 	@Override
 	public Instruction next() {
-		if (openingSection && !enterSection) {
+		if (tryOpeningSection) {
 			skipSection();
 		}
-		else if (closingSection && !exitSection) {
+		else if (tryClosingSection) {
 			reenterSection();
 		}
 		
@@ -87,8 +81,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		Instruction instruction = sequence.get(currentPosition);
 		
-		openingSection = instruction.opening();
-		closingSection = instruction.closing();
+		tryOpeningSection = instruction.opening();
+		tryClosingSection = instruction.closing();
 		
 		return instruction;
 	}
@@ -101,7 +95,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			openedSections += openCloseDelta();
 		}
 		
-		enterSection = false;
+		tryClosingSection = false;
 	}
 
 	private void skipSection() {
@@ -112,7 +106,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			openedSections += openCloseDelta();
 		}
 		
-		exitSection = false;
+		tryOpeningSection = false;
 	}
 
 	private int openCloseDelta() {
