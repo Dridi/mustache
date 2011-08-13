@@ -7,13 +7,23 @@ import java.io.StreamCorruptedException;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * The {@code Processor} class iterates through a sequence of {@link Instruction}s
+ * and needs to be notified to enter or exit sections. {@code Processor}s can be
+ * serialized and reused at will but their {@link Instruction}s sequence can not
+ * be modified.
+ * 
+ * <p>This class is not meant to be manipulated concurrently by several threads.</p>
+ * 
+ * @author Dri
+ */
 public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	private static final long serialVersionUID = 289040399110456725L;
 
 	private final List<Instruction> sequence;
-	private final transient int maxPosition;
 	
+	private final transient int maxPosition;
 	private transient int currentPosition = -1;
 	private transient boolean tryOpeningSection;
 	private transient boolean tryClosingSection;
@@ -23,6 +33,14 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		this.maxPosition = sequence.size() - 1;
 	}
 	
+	/**
+	 * Creates a {@code Processor} from a processable {@link Sequencer}.
+	 * @param sequencer the {@link Sequencer}
+	 * @return a newly created {@code Processor}
+	 * @throws NullPointerException if {@code sequencer} is {@code null}
+	 * @throws IllegalArgumentException if {@code sequencer} is not processable
+	 * @see Sequencer#isProcessable()
+	 */
 	public static Processor fromSequencer(Sequencer sequencer) {
 		if (sequencer == null) {
 			throw new NullPointerException();
@@ -37,12 +55,20 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		}
 	}
 	
+	/**
+	 * Resets the {@code Processor} to its initial state.
+	 */
 	public void reset() {
 		currentPosition = -1;
 		tryOpeningSection = false;
 		tryClosingSection = false;
 	}
 	
+	/**
+	 * Notifies the {@code Processor} to enter the section.
+	 * @throws IllegalStateException if the current {@link Instruction} is not opening
+	 * @see Instruction#opening()
+	 */
 	public void enterSection() {
 		if (tryOpeningSection == false) {
 			throw new IllegalStateException("Unexpected attempt to enter a section.");
@@ -50,7 +76,12 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		tryOpeningSection = false;
 	}
-	
+
+	/**
+	 * Notifies the {@code Processor} to exit the section.
+	 * @throws IllegalStateException if the current {@link Instruction} is not closing
+	 * @see Instruction#closing()
+	 */
 	public void exitSection() {
 		if (tryClosingSection == false) {
 			throw new IllegalStateException("Unexpected attempt to exit a section.");
@@ -58,12 +89,20 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		tryClosingSection = false;
 	}
-
+	
+	/**
+	 * Indicates whether there is still {@code Instruction}s to process.
+	 */
 	@Override
 	public boolean hasNext() {
 		return currentPosition < maxPosition;
 	}
 
+	/**
+	 * Returns the next {@code Instruction}s to process.
+	 * @see #enterSection()
+	 * @see #exitSection()
+	 */
 	@Override
 	public Instruction next() {
 		if (tryOpeningSection) {
@@ -117,7 +156,11 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		Instruction instruction = sequence.get(currentPosition);
 		return instruction.opening() ? 1 : instruction.closing() ? -1 : 0;
 	}
-
+	
+	/**
+	 * Cannot remove {@code Instruction}s from the sequence.
+	 * @throws UnsupportedOperationException
+	 */
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();

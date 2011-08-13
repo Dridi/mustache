@@ -12,6 +12,8 @@ import java.util.List;
  * sections and not closing them in the <i>LIFO</i> order in a fluent API
  * fashion.
  * 
+ * <p>This class is not meant to be manipulated concurrently by several threads.</p>
+ * 
  * @author Dri
  * @see Instruction
  * @see Processor
@@ -95,7 +97,7 @@ public final class Sequencer {
 	 * open sections.
 	 * 
 	 * @return {@code true} if the sequence is processable
-	 * @see Processor
+	 * @see Processor#fromSequencer(Sequencer)
 	 */
 	public boolean isProcessable() {
 		return sequence.size() > 0 && sections.size() == 0;
