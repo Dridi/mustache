@@ -6,11 +6,28 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
+/**
+ * The {@code Sequencer} class manipulates a sequence of {@link Instruction}s
+ * and ensures the coherence of the section stack. It prevents from opening
+ * sections and not closing them in the <i>LIFO</i> order in a fluent API
+ * fashion.
+ * 
+ * @author Dri
+ * @see Instruction
+ * @see Processor
+ */
 public final class Sequencer {
 
 	private Deque<String> sections = new ArrayDeque<String>();
 	private List<Instruction> sequence = new ArrayList<Instruction>();
 	
+	/**
+	 * Adds a legal {@link Instruction} in the sequence.
+	 * @param instruction the {@link Instruction} to add
+	 * @return this {@code Sequencer} object
+	 * @throws SequenceException for a misplaced close {@link Instruction}
+	 * @throws NullPointerException if {@code instruction} is {@code null}
+	 */
 	public Sequencer add(Instruction instruction) throws SequenceException {
 		if (instruction == null) {
 			throw new NullPointerException();
@@ -45,23 +62,58 @@ public final class Sequencer {
 			throw new SequenceException("Expected to close " + current + " not " + section);
 		}
 	}
-
+	
+	/**
+	 * Adds legal {@link Instruction}s in the sequence.
+	 * @param instruction the {@link Instruction}s to add
+	 * @return this {@code Sequencer} object
+	 * @throws SequenceException for misplaced close {@link Instruction}s
+	 * @throws NullPointerException if {@code instruction}s is {@code null} or contains {@code null} items.
+	 */
 	public Sequencer addAll(List<Instruction> instructions) throws SequenceException {
-		for (Instruction instruction : instructions) {
-			add(instruction);
+		if (instructions == null) {
+			throw new NullPointerException();
 		}
+		
+		Sequencer proxy = new Sequencer();
+		proxy.sections.addAll(this.sections);
+		proxy.sequence.addAll(this.sequence);
+		
+		for (Instruction instruction : instructions) {
+			proxy.add(instruction);
+		}
+		
+		this.sections = proxy.sections;
+		this.sequence = proxy.sequence;
+		
 		return this;
 	}
 	
+	/**
+	 * Indicates whether the sequence is processable in its current state. To be
+	 * processable, a sequence needs at least one instruction and no currently
+	 * open sections.
+	 * 
+	 * @return {@code true} if the sequence is processable
+	 * @see Processor
+	 */
 	public boolean isProcessable() {
 		return sequence.size() > 0 && sections.size() == 0;
 	}
 	
+	/**
+	 * Returns an unmodifiable copy of the current sequence.
+	 * @return the current sequence of instructions
+	 */
 	public List<Instruction> getSequence() {
 		List<Instruction> copy = new ArrayList<Instruction>(sequence);
 		return Collections.unmodifiableList(copy);
 	}
 	
+	/**
+	 * Removes all {@link Instruction}s from this sequencer.
+	 * @return this {@code Sequencer} object
+	 */
 	public Sequencer clear() {
 		sequence.clear();
 		sections.clear();

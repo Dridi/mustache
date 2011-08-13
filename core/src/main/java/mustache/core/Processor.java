@@ -24,11 +24,17 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 	
 	public static Processor fromSequencer(Sequencer sequencer) {
-		if ( !sequencer.isProcessable() ) {
-			throw new IllegalArgumentException("Sequence not processable");
+		if (sequencer == null) {
+			throw new NullPointerException();
 		}
 		
-		return new Processor( sequencer.getSequence() );
+		synchronized (sequencer) {
+			if ( !sequencer.isProcessable() ) {
+				throw new IllegalArgumentException("Sequence not processable");
+			}
+			
+			return new Processor( sequencer.getSequence() );
+		}
 	}
 	
 	public void reset() {
