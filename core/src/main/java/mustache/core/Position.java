@@ -63,7 +63,7 @@ public final class Position {
 	 * Moves forward from the current position through given text.
 	 * 
 	 * @param text The text to move through
-	 * @return The position after <code>this</code> and <code>text</code>
+	 * @return The position after {@code this} and {@code text}
 	 */
 	public Position forward(String text) {
 		Position forward = new Position();

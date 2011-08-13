@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
  * 
  * 
  * <p>
- * Dot-separated variable names look like <code>dog.body.tail</code> where dog
+ * Dot-separated variable names look like {@code dog.body.tail} where dog
  * would be a property of the root object. Variables can be object fields,
  * no-arg methods and {@link Map} keys. If interpolation fails at some point,
- * <code>null</code> is returned. The <code>Interpolation</code> itself does
- * <i>not</i> coerce <code>null</code> or falsey values into empty strings. This
+ * {@code null} is returned. The {@code Interpolation} itself does
+ * <i>not</i> coerce {@code null} or falsey values into empty strings. This
  * feature is only needed for actual {@link Mustache} rendering.
  * </p>
  * 
@@ -59,9 +59,9 @@ public final class Interpolation {
 	}
 	
 	/**
-	 * Returns <code>true</code> if the query is valid.
+	 * Returns {@code true} if the query is valid.
 	 * @param query the query to check
-	 * @return <code>true</code> if the query is valid
+	 * @return {@code true} if the query is valid
 	 */
 	public static boolean isValidQuery(String query) {
 		return QUERY_PATTERN.matcher(query).matches();
@@ -70,16 +70,15 @@ public final class Interpolation {
 	/**
 	 * This method looks up the query's variables in the object graph. It returns the value
 	 * of the last variable unless a variable wasn't found at some point. If the interpolation
-	 * failed, it returns <code>null</code>, but returning <code>null</code> does not necessary
+	 * failed, it returns {@code null}, but returning {@code null} does not necessary
 	 * mean failure.
 	 * 
 	 * @param query the context query
 	 * @param object the object graph
-	 * @return the interpolated value or <code>null</code> if it failed
+	 * @return the interpolated value or {@code null} if it failed
 	 * @throws IllegalArgumentException if the query is not valid
 	 */
 	public static Object interpolate(String query, Object object) {
-		
 		checkQuery(query);
 		
 		Object value = object;
@@ -98,7 +97,6 @@ public final class Interpolation {
 	}
 	
 	private static Object getValue(String name, Object object) {
-		
 		if (object instanceof Map) {
 			return ((Map<?, ?>) object).get(name);
 		}
@@ -120,17 +118,16 @@ public final class Interpolation {
 	 * Indicates whether their is a base variable matching the query in the object graph.
 	 * 
 	 * <p>
-	 * Querying <code>dog.body.tail</code> will return <code>true</code> only if there
-	 * is a <code>dog</code> variable in <code>object</code>.
+	 * Querying {@code dog.body.tail} will return {@code true} only if there
+	 * is a {@code dog} variable in {@code object}.
 	 * </p>
 	 * 
 	 * @param query the context query
 	 * @param object the object graph
-	 * @return <code>true</code> if there is a base variable matching the query
+	 * @return {@code true} if there is a base variable matching the query
 	 * @throws IllegalArgumentException if the query is not valid
 	 */
 	public static boolean hasBaseVariable(String query, Object object) {
-
 		checkQuery(query);
 		
 		if (object == null || object.getClass().isArray() || object instanceof Collection) {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The <code>Context</code> class is a wrapper providing a facility for Mustache
+ * The {@code Context} class is a wrapper providing a facility for Mustache
  * {@link Interpolation}. It offers a means to querying a specific value in a
- * complex graph of objects. The <code>Context</code> itself only holds the root
+ * complex graph of objects. The {@code Context} itself only holds the root
  * object of the graph.
  * 
  * <h4>Interpolation</h4>
@@ -35,7 +35,7 @@ import java.util.List;
 public class Context {
 	
 	/**
-	 * The interpolation representing actual data wrapped by the <code>Context</code>.
+	 * The interpolation representing actual data wrapped by the {@code Context}.
 	 */
 	public static final String SELF = ".";
 	
@@ -46,23 +46,22 @@ public class Context {
 	}
 	
 	/**
-	 * A factory for creating a <code>Context</code> holding <code>data</code>.
+	 * A factory for creating a {@code Context} holding {@code data}.
 	 * 
-	 * @param data data wrapped by the <code>Context</code>
-	 * @return a newly created <code>Context</code>
+	 * @param data data wrapped by the {@code Context}
+	 * @return a newly created {@code Context}
 	 */
 	public static Context newInstance(Object data) {
 		return isBasic(data) ? new BasicContext(data) : new Context(data);
 	}
 	
 	/**
-	 * A factory for creating a {@link List} of <code>Context</code> holding <code>data</code>.
+	 * A factory for creating a {@link List} of {@code Context} holding {@code data}.
 	 * 
-	 * @param data a list of data wrapped by the <code>Context</code> instances
-	 * @return a {@link List} of newly created <code>Context</code>
+	 * @param data a list of data wrapped by the {@code Context} instances
+	 * @return a {@link List} of newly created {@code Context}
 	 */
 	public static List<Context> newInstances(List<?> data) {
-		
 		if (data == null) {
 			throw new IllegalArgumentException();
 		}
@@ -77,11 +76,11 @@ public class Context {
 	}
 	
 	/**
-	 * Returns <code>true</code> if the query is a valid interpolation. In a
-	 * <code>Context</code>, {@link #SELF} is a valid query.
+	 * Returns {@code true} if the query is a valid interpolation. In a
+	 * {@code Context}, {@link #SELF} is a valid query.
 	 * 
 	 * @param query the query to check
-	 * @return <code>true</code> if the query is valid
+	 * @return {@code true} if the query is valid
 	 * @see Interpolation#isValidQuery(String)
 	 */
 	public static boolean isValidQuery(String query) {
@@ -93,42 +92,37 @@ public class Context {
 	 * to {@link #SELF}.
 	 * 
 	 * @param query the context query
-	 * @return the interpolated value or <code>null</code> if it failed
+	 * @return the interpolated value or {@code null} if it failed
 	 * @throws IllegalArgumentException if the query is not valid
 	 * @see Interpolation#interpolate(String, Object)
 	 */
 	public Object interpolate(String query) {
-		
 		if ( SELF.equals(query) ) {
 			return data;
 		}
-		
 		return Interpolation.interpolate(query, data);
 	}
 	
 	/**
 	 * Indicates whether the first part of the query matches a variable in the
-	 * context's root. A {@link #SELF} query shall always return <code>true</code>
+	 * context's root. A {@link #SELF} query shall always return {@code true}
 	 * since it matches the root itself.
 	 * 
 	 * @param query the context query
-	 * @return <code>true</code> if there is a base variable matching the query
+	 * @return {@code true} if there is a base variable matching the query
 	 * @throws IllegalArgumentException if the query is not valid
 	 * @see Interpolation#hasBaseVariable(String, Object)
 	 */
 	public boolean hasBaseVariable(String query) {
-		
 		if ( SELF.equals(query) ) {
 			return true;
 		}
-		
 		return Interpolation.hasBaseVariable(query, data);
 	}
 	
 	private static final Class<?>[] BASIC_CLASSES = {String.class, Number.class, Boolean.class};
 	
 	private static boolean isBasic(Object data) {
-		
 		if (data == null) {
 			return true;
 		}
@@ -139,15 +133,14 @@ public class Context {
 			}
 		}
 		
-		return false;
+		return !data.getClass().isArray();
 	}
 	
 	/**
-	 * The <code>BasicContext</code> class is a simplified {@link Context} for basic types.
+	 * The {@code BasicContext} class is a simplified {@link Context} for basic types.
 	 * Basic types are types for which interpolation other than {@link #SELF} is irrelevant.
 	 */
 	static class BasicContext extends Context {
-		
 		private BasicContext(Object data) {
 			super(data);
 		}
@@ -157,7 +150,6 @@ public class Context {
 		 */
 		@Override
 		public Object interpolate(String query) {
-			
 			if ( SELF.equals(query) ) {
 				return super.data;
 			}
@@ -171,7 +163,6 @@ public class Context {
 		 */
 		@Override
 		public boolean hasBaseVariable(String query) {
-			
 			if ( SELF.equals(query) ) {
 				return true;
 			}
