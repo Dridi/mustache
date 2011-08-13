@@ -11,15 +11,16 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	private static final long serialVersionUID = 289040399110456725L;
 
-	private transient int currentPosition = -1;
-	
 	private final List<Instruction> sequence;
+	private final transient int maxPosition;
 	
+	private transient int currentPosition = -1;
 	private transient boolean tryOpeningSection;
 	private transient boolean tryClosingSection;
 	
 	private Processor(List<Instruction> sequence) {
 		this.sequence = sequence;
+		this.maxPosition = sequence.size() - 1;
 	}
 	
 	public static Processor fromSequencer(Sequencer sequencer) {
@@ -54,7 +55,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 
 	@Override
 	public boolean hasNext() {
-		return currentPosition < sequence.size() - 1;
+		return currentPosition < maxPosition;
 	}
 
 	@Override
@@ -72,13 +73,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private Instruction nextInstruction() {
-		// this is possible when skipping a section
-		// where the close instruction is the very
-		// last one in the sequence
-		if (currentPosition == sequence.size()) {
-			return Instruction.NOP;
-		}
-		
 		Instruction instruction = sequence.get(currentPosition);
 		
 		tryOpeningSection = instruction.opening();
@@ -104,6 +98,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		while (openedSections > 0) {
 			currentPosition++;
 			openedSections += openCloseDelta();
+		}
+		
+		if (currentPosition > maxPosition) {
+			currentPosition = maxPosition;
 		}
 		
 		tryOpeningSection = false;

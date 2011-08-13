@@ -16,11 +16,6 @@ public final class Instruction implements Serializable {
 	private static final long serialVersionUID = 7976280972290440553L;
 	
 	/**
-	 * A reusable <i>no operation performed</i> {@code Instruction}.
-	 */
-	public static final Instruction NOP = new Instruction(null, null);
-	
-	/**
 	 * The set of available instructions.
 	 */
 	public enum Type {
@@ -117,9 +112,6 @@ public final class Instruction implements Serializable {
 		}
 		
 		private Object readResolve() {
-			if (type == null && data == null) {
-				return Instruction.NOP;
-			}
 			return Instruction.newInstance(type, data);
 		}
 	}
