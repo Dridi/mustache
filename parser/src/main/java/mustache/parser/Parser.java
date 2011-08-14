@@ -16,18 +16,18 @@ public class Parser {
 	
 	public static Sequencer parseString(String string) throws ParseException, IOException {
 		Reader reader = new StringReader(string);
-		return new Parser(reader).parse().sequencer;
+		return new Parser(reader).parse();
 	}
 	
 	public static Sequencer parseReadable(Readable string) throws ParseException, IOException {
-		return new Parser(string).parse().sequencer;
+		return new Parser(string).parse();
 	}
 	
 	public static Sequencer parseFile(File file) throws ParseException, IOException {
 		Reader reader = null;
 		try {
 			reader = new FileReader(file);
-			return new Parser(reader).parse().sequencer;
+			return new Parser(reader).parse();
 		} finally {
 			IOUtils.closeQuietly(reader);
 		}
@@ -45,7 +45,7 @@ public class Parser {
 		this.reader = new LineReader(readable);
 	}
 	
-	private Parser parse() throws ParseException, IOException {
+	private Sequencer parse() throws ParseException, IOException {
 		try {
 			int lineNumber = 1;
 			while (reader.hasNext()) {
@@ -53,7 +53,7 @@ public class Parser {
 				lineNumber++;
 			}
 			addLastToken();
-			return this;
+			return sequencer;
 		}
 		catch (SequenceException e) {
 			throw new ParseException(e.getMessage(), e);
