@@ -7,7 +7,6 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import mustache.core.Instruction;
-import mustache.core.Instruction.Type;
 import mustache.core.SequenceException;
 import mustache.core.Sequencer;
 
@@ -18,6 +17,10 @@ public class Parser {
 	public static Sequencer parseString(String string) throws ParseException, IOException {
 		Reader reader = new StringReader(string);
 		return new Parser(reader).parse().sequencer;
+	}
+	
+	public static Sequencer parseReadable(Readable string) throws ParseException, IOException {
+		return new Parser(string).parse().sequencer;
 	}
 	
 	public static Sequencer parseFile(File file) throws ParseException, IOException {
@@ -61,65 +64,42 @@ public class Parser {
 		if (currentToken.length() == 0) {
 			return;
 		}
-		if (insideTag || insideUnescapedTag) {
+		if (insideTag || delimiter.isInsideTag()) {
+			// TODO replace by delimiter's token
 			throw new ParseException("Unterminated tag " + currentToken);
 		}
-		addInstruction(Instruction.Type.APPEND_TEXT);
+		appendText();
 	}
 	
 	private StringBuilder currentToken = new StringBuilder();
 	private boolean insideTag = false;
-	private boolean insideUnescapedTag = false;
 	
 	private void parseLine(String line, int lineNumber) throws SequenceException {
 		int position = 0;
 		
 		while (position < line.length()) {
-			if (insideTag) {
-				int tagPosition = line.indexOf(delimiter.getStop(), position);
-				
-				if (tagPosition >= 0) {
-					currentToken.append( line.substring(position, tagPosition) );
-					addInstruction(Instruction.Type.APPEND_TEXT);
-					position = tagPosition + delimiter.getStop().length();
-					insideTag = false;
-					continue;
-				}
+			int start = position;
+			position = delimiter.parse(line, position);
+			
+			if (insideTag && !delimiter.isInsideTag()) {
+				// TODO add instruction from parsed tag
 			}
-			else if (insideUnescapedTag ) {
-				int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_STOP, position);
-				
-				if (unescapedTagPosition >= 0) {
-					currentToken.append( line.substring(position, unescapedTagPosition) );
-					addInstruction(Instruction.Type.APPEND_TEXT);
-					position = unescapedTagPosition + Delimiter.UNESCAPED_STOP.length();
-					insideUnescapedTag = false;
-					continue;
-				}
+			else if (!insideTag && delimiter.isInsideTag()) {
+				currentToken.append( line.substring(start, position) );
+				position += delimiter.tagStartLength(position);
+				appendText();
 			}
-			else {
-				int tagPosition = line.indexOf(delimiter.getStart(), position);
-				int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_START, position);
-				
-				insideTag = tagPosition >= 0;
-				insideUnescapedTag = unescapedTagPosition >= 0;
-				
-				if (insideTag || insideUnescapedTag) {
-					currentToken.append( line.substring(position, tagPosition) );
-					addInstruction(Instruction.Type.APPEND_TEXT);
-					position = tagPosition;
-					continue;
-				}
+			else if (!insideTag && !delimiter.isInsideTag()) {
+				currentToken.append( line.substring(start, position) );
 			}
 			
-			currentToken.append( line.substring(position) );
-			position = line.length();
+			insideTag = delimiter.isInsideTag();
 		}
 	}
 
-	private void addInstruction(Type appendText) throws SequenceException {
-		sequencer.add(appendText, currentToken.toString());
-		System.out.println("instruction added : " + currentToken);
+	private void appendText() throws SequenceException {
+		sequencer.add(Instruction.Type.APPEND_TEXT, currentToken.toString());
+		System.out.println("text added : " + currentToken);
 		currentToken = new StringBuilder();
 	}
 }
