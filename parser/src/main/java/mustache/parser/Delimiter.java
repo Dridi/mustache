@@ -75,14 +75,32 @@ final class Delimiter {
 		int tagPosition = line.indexOf(start, position);
 		int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_START, position);
 		
-		insideTag = tagPosition >= 0;
-		insideUnescapedTag = unescapedTagPosition >= 0;
-		
-		if (insideTag || insideUnescapedTag) {
-			return tagPosition;
+		if (tagPosition >= 0 || unescapedTagPosition >= 0) {
+			return openTag(tagPosition, unescapedTagPosition);
 		}
 		
 		return line.length();
 	}
+
+	private int openTag(int tagPosition, int unescapedTagPosition) {
+		if ( foundAndBefore(tagPosition, unescapedTagPosition) ) {
+			insideTag = true;
+			return tagPosition;
+		}
+
+		if ( foundAndBefore(unescapedTagPosition, tagPosition) ) {
+			insideUnescapedTag = true;
+			return unescapedTagPosition;
+		}
+		
+		// found both tag starts at the same position
+		insideTag = normalPrecedesUnescaped;
+		insideUnescapedTag = !normalPrecedesUnescaped;
+		
+		return insideTag ? tagPosition : unescapedTagPosition;
+	}
 	
+	private boolean foundAndBefore(int a, int b) {
+		return a == -1 ? false : b == -1 || a < b;
+	}
 }
