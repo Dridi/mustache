@@ -6,5 +6,6 @@
 	</info>
 	<dependencies>
 		<dependency org="mustache" name="mustache-core" rev="latest.revision" conf="default->default"/>
+		<dependency org="commons-io" name="commons-io" rev="2.0+" conf="default->default"/>
 	</dependencies>
 </ivy-module>
