@@ -133,7 +133,7 @@ public class Context {
 			}
 		}
 		
-		return !data.getClass().isArray();
+		return data.getClass().isArray();
 	}
 	
 	/**

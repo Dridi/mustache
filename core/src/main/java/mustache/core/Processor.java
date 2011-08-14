@@ -100,11 +100,16 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 
 	/**
 	 * Returns the next {@code Instruction}s to process.
+	 * @throws IllegalStateException if there is no next Instruction
 	 * @see #enterSection()
 	 * @see #exitSection()
 	 */
 	@Override
 	public Instruction next() {
+		if ( !hasNext() ) {
+			throw new IllegalStateException();
+		}
+		
 		if (tryOpeningSection) {
 			skipSection();
 		}
@@ -187,7 +192,9 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			try {
 				return Processor.fromSequencer( new Sequencer().addAll(sequence) );
 			} catch (SequenceException e) {
-				throw new StreamCorruptedException( e.getMessage() );
+				StreamCorruptedException streamCorruptedException = new StreamCorruptedException( e.getMessage() );
+				streamCorruptedException.initCause(e);
+				throw streamCorruptedException;
 			}
 		}
 	}
