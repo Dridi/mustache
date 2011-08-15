@@ -2,13 +2,12 @@ package mustache;
 
 import java.text.MessageFormat;
 
-import mustache.core.Position;
-
 /**
  * Thrown to indicate a syntax error in a Mustache template.
  * 
  * @author Dri
  */
+@Deprecated
 public final class ParseException extends Exception {
 	
 	private ParseException(String message, Position position) {

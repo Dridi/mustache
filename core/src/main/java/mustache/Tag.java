@@ -1,12 +1,12 @@
 package mustache;
 
-import mustache.core.Position;
 
 /**
  * Represents a tag in a template.
  * 
  * @author Dri
  */
+@Deprecated
 final class Tag {
 	
 	private String tag;

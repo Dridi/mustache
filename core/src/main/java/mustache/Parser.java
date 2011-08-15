@@ -1,10 +1,10 @@
 package mustache;
 
+import mustache.core.Context;
+
 import org.apache.commons.lang.StringEscapeUtils;
 
-import mustache.core.Context;
-import mustache.core.Position;
-
+@Deprecated
 public class Parser {
 	
 	private final Stream stream;

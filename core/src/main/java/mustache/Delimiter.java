@@ -2,6 +2,7 @@ package mustache;
 
 import java.util.regex.Pattern;
 
+@Deprecated
 final class Delimiter {
 	
 	static final String DEFAULT_START = "{{";

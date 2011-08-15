@@ -1,4 +1,4 @@
-package mustache.core;
+package mustache;
 
 import java.text.MessageFormat;
 
@@ -9,6 +9,7 @@ import java.text.MessageFormat;
  * 
  * @author Dri
  */
+@Deprecated
 public final class Position {
 	
 	/**

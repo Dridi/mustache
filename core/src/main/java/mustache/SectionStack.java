@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import mustache.core.Context;
-import mustache.core.Position;
 
+@Deprecated
 class SectionStack {
 	
 	List<Section> sections = new ArrayList<Section>();

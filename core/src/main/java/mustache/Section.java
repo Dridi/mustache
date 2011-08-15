@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mustache.core.Context;
-import mustache.core.Position;
 
+@Deprecated
 class Section {
 	
 	private Position position;
