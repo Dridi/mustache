@@ -86,8 +86,7 @@ public class Parser {
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
 				currentToken.append( line.substring(start, position) );
-				position += delimiter.tagStartLength(position);
-				appendText();
+				position += delimiter.tagStartLength();
 			}
 			else if (!insideTag && !delimiter.isInsideTag()) {
 				currentToken.append( line.substring(start, position) );
@@ -98,6 +97,7 @@ public class Parser {
 	}
 
 	private void addInstruction() throws ParseException, SequenceException {
+		appendText();
 		Instruction instruction = delimiter.getTag().toInstruction(); // FIXME temporary
 		
 		// TODO manage partials
@@ -108,8 +108,10 @@ public class Parser {
 	}
 
 	private void appendText() throws SequenceException {
-		sequencer.add(Instruction.Action.APPEND_TEXT, currentToken.toString());
-		//System.out.println("text added : " + currentToken);
+		currentToken.append( delimiter.trailingBlanks() );
+		if (currentToken.length() > 0) {
+			sequencer.add(Instruction.Action.APPEND_TEXT, currentToken.toString());
+		}
 		currentToken = new StringBuilder();
 	}
 }

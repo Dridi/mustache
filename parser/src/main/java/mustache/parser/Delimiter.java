@@ -19,6 +19,8 @@ final class Delimiter {
 	private boolean normalPrecedesUnescaped = false;
 	private boolean insideTag = false;
 	private boolean insideUnescapedTag = false;
+	private boolean mightBeStandaloneTag = false;
+	private String leadingBlanks = "";
 	
 	Delimiter() { }
 	
@@ -26,11 +28,26 @@ final class Delimiter {
 		return insideTag | insideUnescapedTag;
 	}
 	
-	int tagStartLength(int position) {
+	int tagStartLength() {
 		return insideTag ? start.length() : UNESCAPED_START.length();
 	}
 
 	Tag getTag() throws ParseException {
+		Tag tag = createTag();
+		
+		if (mightBeStandaloneTag && tag.canBeStandalone()) {
+			// TODO check end of line
+		}
+		
+		return tag;
+	}
+
+	String trailingBlanks() {
+		// TODO Auto-generated method stub
+		return "";
+	}
+
+	private Tag createTag() throws ParseException {
 		String content = currentTag.toString().trim();
 		currentTag = new StringBuilder();
 		
@@ -104,12 +121,24 @@ final class Delimiter {
 		int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_START, position);
 		
 		if (tagPosition >= 0 | unescapedTagPosition >= 0) {
-			return openTag(tagPosition, unescapedTagPosition);
+			int actualTagPosition = openTag(tagPosition, unescapedTagPosition);
+			updateStandaloneFlag(line, actualTagPosition);
+			return actualTagPosition;
 		}
 		
 		return line.length();
 	}
 	
+	private void updateStandaloneFlag(String line, int actualTagPosition) {
+		if (insideUnescapedTag) {
+			mightBeStandaloneTag = false;
+			return;
+		}
+		String lineStart = line.substring(0, actualTagPosition);
+		mightBeStandaloneTag = lineStart.trim().equals("");
+		leadingBlanks = mightBeStandaloneTag ? lineStart : "";
+	}
+
 	private int openTag(int tagPosition, int unescapedTagPosition) {
 		if ( foundAndBefore(tagPosition, unescapedTagPosition) ) {
 			insideTag = true;
