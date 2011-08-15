@@ -3,7 +3,6 @@ package mustache.parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 final class Delimiter {
 	private static final Pattern CHANGE_DELIMITER_PATTERN = Pattern.compile("^\\=\\s*([^= ]+)\\s*([^= ]+)\\s*\\=$");
 	
@@ -59,7 +58,6 @@ final class Delimiter {
 		if (UNESCAPED_START.equals(start) || UNESCAPED_STOP.equals(stop)) {
 			throw new ParseException("Normal tags cannot override escape tags");
 		}
-		
 		this.normalPrecedesUnescaped = start.length() > UNESCAPED_START.length();
 		this.start = start;
 		this.stop = stop;

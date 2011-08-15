@@ -37,12 +37,12 @@ public class Parser {
 		return parseFile( new File(path) );
 	}
 	
-	private final LineReader reader;
+	private final LineIterator reader;
 	private final Delimiter delimiter = new Delimiter();
 	private final Sequencer sequencer = new Sequencer();
 	
 	private Parser(Readable readable) {
-		reader = new LineReader(readable);
+		reader = LineIterator.fromReadable(readable);
 	}
 	
 	private Sequencer parse() throws ParseException, IOException {
