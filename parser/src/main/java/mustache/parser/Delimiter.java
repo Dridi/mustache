@@ -109,13 +109,13 @@ final class Delimiter {
 		
 		return line.length();
 	}
-
+	
 	private int openTag(int tagPosition, int unescapedTagPosition) {
 		if ( foundAndBefore(tagPosition, unescapedTagPosition) ) {
 			insideTag = true;
 			return tagPosition;
 		}
-
+		
 		if ( foundAndBefore(unescapedTagPosition, tagPosition) ) {
 			insideUnescapedTag = true;
 			return unescapedTagPosition;

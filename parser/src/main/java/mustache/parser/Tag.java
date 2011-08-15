@@ -88,7 +88,6 @@ final class Tag {
 					return type;
 				}
 			}
-			
 			return VARIABLE;
 		}
 	}

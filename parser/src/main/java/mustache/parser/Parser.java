@@ -82,7 +82,6 @@ public class Parser {
 			position = delimiter.parse(line, position);
 			
 			if (insideTag && !delimiter.isInsideTag()) {
-				// TODO add instruction from parsed tag
 				addInstruction();
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
@@ -100,6 +99,8 @@ public class Parser {
 
 	private void addInstruction() throws ParseException, SequenceException {
 		Instruction instruction = delimiter.getTag().toInstruction(); // FIXME temporary
+		
+		// TODO manage partials
 		
 		if (instruction != null) {
 			sequencer.add(instruction);

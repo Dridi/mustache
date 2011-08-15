@@ -1,14 +1,15 @@
 package mustache.parser;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.CharBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public final class LineReader {
+public class LineIterator {
 	
 	private final Readable readable;
-	private final char[] buffer = new char[4096];
+	protected final char[] buffer = new char[4096];
 	private final CharBuffer charBuffer = CharBuffer.wrap(buffer);
 	
 	private StringBuilder currentLine = new StringBuilder();
@@ -16,8 +17,18 @@ public final class LineReader {
 	private boolean continueFromCarriageReturn = false;
 	private boolean finished = false;
 	
-	public LineReader(Readable readable) {
+	private LineIterator(Readable readable) {
 		this.readable = readable;
+	}
+	
+	public static LineIterator fromReadable(Readable readable) {
+		if (readable == null) {
+			throw new NullPointerException();
+		}
+		if (readable instanceof Reader) {
+			return new LineReader((Reader) readable);
+		}
+		return new LineIterator(readable);
 	}
 	
 	public boolean hasNext() {
@@ -28,17 +39,14 @@ public final class LineReader {
 		if ( !hasNext() ) {
 			throw new IllegalStateException();
 		}
-		
 		while ( lines.isEmpty() ) {
 			readLines();
 		}
-		
 		return lines.poll();
 	}
 	
 	private void readLines() throws IOException {
-		charBuffer.clear();
-		int size = readable.read(charBuffer);
+		int size = readChars();
 		
 		if (size < 0) {
 			finished = true;
@@ -47,6 +55,11 @@ public final class LineReader {
 		}
 		
 		addLines(size);
+	}
+
+	protected int readChars() throws IOException {
+		charBuffer.clear();
+		return readable.read(charBuffer);
 	}
 
 	private void addLines(int size) {
@@ -66,7 +79,6 @@ public final class LineReader {
 			else if (buffer[position] == '\r') {
 				continueFromCarriageReturn = true;
 			}
-			
 			position++;
 		}
 		
@@ -78,5 +90,19 @@ public final class LineReader {
 		lines.add( currentLine.toString() );
 		currentLine = new StringBuilder();
 		return position;
+	}
+	
+	private static class LineReader extends LineIterator {
+		private Reader reader;
+		
+		private LineReader(Reader reader) {
+			super(reader);
+			this.reader = reader;
+		}
+		
+		@Override
+		protected int readChars() throws IOException {
+			return reader.read(buffer, 0, buffer.length);
+		}
 	}
 }
