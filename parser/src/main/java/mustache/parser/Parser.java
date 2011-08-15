@@ -61,17 +61,17 @@ public class Parser {
 	}
 
 	private void addLastToken() throws ParseException, SequenceException {
-		if (currentToken.length() == 0) {
+		if (currentText.length() == 0) {
 			return;
 		}
 		if (insideTag || delimiter.isInsideTag()) {
 			// TODO replace by delimiter's token
-			throw new ParseException("Unterminated tag " + currentToken);
+			throw new ParseException("Unterminated tag " + currentText);
 		}
 		appendText();
 	}
 	
-	private StringBuilder currentToken = new StringBuilder();
+	private StringBuilder currentText = new StringBuilder();
 	private boolean insideTag = false;
 	
 	private void parseLine(String line, int lineNumber) throws SequenceException, ParseException {
@@ -85,11 +85,11 @@ public class Parser {
 				addInstruction();
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
-				currentToken.append( line.substring(start, position) );
+				currentText.append( line.substring(start, position) );
 				position += delimiter.tagStartLength();
 			}
 			else if (!insideTag && !delimiter.isInsideTag()) {
-				currentToken.append( line.substring(start, position) );
+				currentText.append( line.substring(start, position) );
 			}
 			
 			insideTag = delimiter.isInsideTag();
@@ -108,10 +108,10 @@ public class Parser {
 	}
 
 	private void appendText() throws SequenceException {
-		currentToken.append( delimiter.trailingBlanks() );
-		if (currentToken.length() > 0) {
-			sequencer.add(Instruction.Action.APPEND_TEXT, currentToken.toString());
+		currentText.append( delimiter.trailingBlanks() );
+		if (currentText.length() > 0) {
+			sequencer.add(Instruction.Action.APPEND_TEXT, currentText.toString());
 		}
-		currentToken = new StringBuilder();
+		currentText = new StringBuilder();
 	}
 }
