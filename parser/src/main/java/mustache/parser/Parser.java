@@ -42,7 +42,7 @@ public class Parser {
 	private final Sequencer sequencer = new Sequencer();
 	
 	private Parser(Readable readable) {
-		this.reader = new LineReader(readable);
+		reader = new LineReader(readable);
 	}
 	
 	private Sequencer parse() throws ParseException, IOException {
@@ -74,7 +74,7 @@ public class Parser {
 	private StringBuilder currentToken = new StringBuilder();
 	private boolean insideTag = false;
 	
-	private void parseLine(String line, int lineNumber) throws SequenceException {
+	private void parseLine(String line, int lineNumber) throws SequenceException, ParseException {
 		int position = 0;
 		
 		while (position < line.length()) {
@@ -83,6 +83,7 @@ public class Parser {
 			
 			if (insideTag && !delimiter.isInsideTag()) {
 				// TODO add instruction from parsed tag
+				addInstruction();
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
 				currentToken.append( line.substring(start, position) );
@@ -97,9 +98,17 @@ public class Parser {
 		}
 	}
 
+	private void addInstruction() throws ParseException, SequenceException {
+		Instruction instruction = delimiter.getTag().toInstruction(); // FIXME temporary
+		
+		if (instruction != null) {
+			sequencer.add(instruction);
+		}
+	}
+
 	private void appendText() throws SequenceException {
-		sequencer.add(Instruction.Type.APPEND_TEXT, currentToken.toString());
-		System.out.println("text added : " + currentToken);
+		sequencer.add(Instruction.Action.APPEND_TEXT, currentToken.toString());
+		//System.out.println("text added : " + currentToken);
 		currentToken = new StringBuilder();
 	}
 }

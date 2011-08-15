@@ -18,7 +18,7 @@ public final class Instruction implements Serializable {
 	/**
 	 * The set of available instructions.
 	 */
-	public enum Type {
+	public enum Action {
 		APPEND_TEXT,
 		APPEND_VARIABLE,
 		APPEND_UNESCAPED_VARIABLE,
@@ -27,31 +27,31 @@ public final class Instruction implements Serializable {
 		CLOSE_SECTION;
 	}
 	
-	private final Type type;
+	private final Action action;
 	private final String data;
 
-	private Instruction(Type type, String data) {
-		this.type = type;
+	private Instruction(Action action, String data) {
+		this.action = action;
 		this.data = data;
 	}
 	
 	/**
 	 * Creates a new {@code Instruction}.
-	 * @param type the type of {@code Instruction}
+	 * @param action the type of {@code Instruction}
 	 * @param data the data associated to the {@code Instruction}
 	 * @return a newly created {@code Instruction}
-	 * @throws NullPointerException if {@code type} or {@code data} is {@code null}
+	 * @throws NullPointerException if {@code action} or {@code data} is {@code null}
 	 */
-	public static Instruction newInstance(Type type, String data) {
-		if (type == null || data == null) {
+	public static Instruction newInstance(Action action, String data) {
+		if (action == null | data == null) {
 			throw new NullPointerException();
 		}
 		
-		if (type != Type.APPEND_TEXT && !Context.isValidQuery(data)) {
+		if (action != Action.APPEND_TEXT && !Context.isValidQuery(data)) {
 			throw new IllegalArgumentException("Invalid interpolation : " + data);
 		}
 		
-		return new Instruction(type, data);
+		return new Instruction(action, data);
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public final class Instruction implements Serializable {
 	 * @return {@code true} if it indicates a section opening
 	 */
 	public boolean opening() {
-		return type == Type.OPEN_SECTION || type == Type.OPEN_INVERTED_SECTION;
+		return action == Action.OPEN_SECTION | action == Action.OPEN_INVERTED_SECTION;
 	}
 
 	/**
@@ -67,14 +67,14 @@ public final class Instruction implements Serializable {
 	 * @return {@code true} if it indicates a section closing
 	 */
 	public boolean closing() {
-		return type == Type.CLOSE_SECTION;
+		return action == Action.CLOSE_SECTION;
 	}
 	
 	/**
-	 * @return the {@code Instruction} {@link Type}
+	 * @return the {@code Instruction} {@link Action}
 	 */
-	public Type getType() {
-		return type;
+	public Action getAction() {
+		return action;
 	}
 	
 	/**
@@ -85,11 +85,11 @@ public final class Instruction implements Serializable {
 	}
 	
 	/**
-	 * @return the {@code Instruction} {@link Type} name
+	 * @return the {@code Instruction} {@link Action} name
 	 */
 	@Override
 	public String toString() {
-		return "Instruction " + type;
+		return "Instruction " + action;
 	}
 
 	private Object writeReplace() {
@@ -103,16 +103,16 @@ public final class Instruction implements Serializable {
 	private static class SerializationProxy implements Serializable {
 		private static final long serialVersionUID = -1303026970090245725L;
 		
-		private final Type type;
+		private final Action action;
 		private final String data;
 
 		SerializationProxy(Instruction instruction) {
-			this.type = instruction.type;
+			this.action = instruction.action;
 			this.data = instruction.data;
 		}
 		
 		private Object readResolve() {
-			return Instruction.newInstance(type, data);
+			return Instruction.newInstance(action, data);
 		}
 	}
 }

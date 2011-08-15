@@ -41,8 +41,8 @@ public final class Sequencer {
 		return this;
 	}
 	
-	public Sequencer add(Instruction.Type type, String data) throws SequenceException {
-		return add( Instruction.newInstance(type, data) );
+	public Sequencer add(Instruction.Action action, String data) throws SequenceException {
+		return add( Instruction.newInstance(action, data) );
 	}
 	
 	private void updateSectionStack(Instruction instruction) throws SequenceException {

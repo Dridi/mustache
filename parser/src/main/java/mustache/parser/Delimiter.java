@@ -1,12 +1,18 @@
 package mustache.parser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
 final class Delimiter {
+	private static final Pattern CHANGE_DELIMITER_PATTERN = Pattern.compile("^\\=\\s*([^= ]+)\\s*([^= ]+)\\s*\\=$");
+	
 	static final String DEFAULT_START = "{{";
 	static final String DEFAULT_STOP = "}}";
-
+	
 	static final String UNESCAPED_START = "{{{";
 	static final String UNESCAPED_STOP = "}}}";
-
+	
 	private String start = DEFAULT_START;
 	private String stop = DEFAULT_STOP;
 	private StringBuilder currentTag = new StringBuilder();
@@ -16,8 +22,40 @@ final class Delimiter {
 	private boolean insideUnescapedTag = false;
 	
 	Delimiter() { }
+	
+	boolean isInsideTag() {
+		return insideTag | insideUnescapedTag;
+	}
+	
+	int tagStartLength(int position) {
+		return insideTag ? start.length() : UNESCAPED_START.length();
+	}
 
-	void setBounds(String start, String stop) throws ParseException {
+	Tag getTag() throws ParseException {
+		String content = currentTag.toString().trim();
+		currentTag = new StringBuilder();
+		
+		if (insideUnescapedTag) {
+			return Tag.newUnescapedTag(content);
+		}
+		
+		try {
+			return Tag.newTag(content);
+		} catch (ChangeDelimiterException e) {
+			changeDelimiter(content);
+			return e.getTag();
+		}
+	}
+	
+	private void changeDelimiter(String content) throws ParseException {
+		Matcher matcher = CHANGE_DELIMITER_PATTERN.matcher(content);
+		if ( !matcher.matches() ) {
+			throw new ParseException("Invalid tag content : " + content);
+		}
+		setBounds(matcher.group(1), matcher.group(2));
+	}
+
+	private void setBounds(String start, String stop) throws ParseException {
 		if (UNESCAPED_START.equals(start) || UNESCAPED_STOP.equals(stop)) {
 			throw new ParseException("Normal tags cannot override escape tags");
 		}
@@ -26,15 +64,7 @@ final class Delimiter {
 		this.start = start;
 		this.stop = stop;
 	}
-	
-	boolean isInsideTag() {
-		return insideTag || insideUnescapedTag;
-	}
-	
-	int tagStartLength(int position) {
-		return insideTag ? start.length() : UNESCAPED_START.length();
-	}
-	
+
 	int parse(String line, int position) {
 		if (insideTag) {
 			return parseTag(line, position);
@@ -75,7 +105,7 @@ final class Delimiter {
 		int tagPosition = line.indexOf(start, position);
 		int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_START, position);
 		
-		if (tagPosition >= 0 || unescapedTagPosition >= 0) {
+		if (tagPosition >= 0 | unescapedTagPosition >= 0) {
 			return openTag(tagPosition, unescapedTagPosition);
 		}
 		
@@ -93,7 +123,7 @@ final class Delimiter {
 			return unescapedTagPosition;
 		}
 		
-		// found both tag starts at the same position
+		// found both tag start at the same position
 		insideTag = normalPrecedesUnescaped;
 		insideUnescapedTag = !normalPrecedesUnescaped;
 		
@@ -101,6 +131,6 @@ final class Delimiter {
 	}
 	
 	private boolean foundAndBefore(int a, int b) {
-		return a == -1 ? false : b == -1 || a < b;
+		return a == -1 ? false : b == -1 | a < b;
 	}
 }
