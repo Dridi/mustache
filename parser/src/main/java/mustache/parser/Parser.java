@@ -65,10 +65,9 @@ public class Parser {
 			return;
 		}
 		if (insideTag || delimiter.isInsideTag()) {
-			// TODO replace by delimiter's token
-			throw new ParseException("Unterminated tag " + currentText);
+			throw new ParseException("Unterminated tag");
 		}
-		appendText();
+		appendCurrentText();
 	}
 	
 	private StringBuilder currentText = new StringBuilder();
@@ -85,11 +84,11 @@ public class Parser {
 				addInstruction();
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
-				currentText.append( line.substring(start, position) );
+				updateCurrentText(line, start, position);
 				position += delimiter.tagStartLength();
 			}
 			else if (!insideTag && !delimiter.isInsideTag()) {
-				currentText.append( line.substring(start, position) );
+				updateCurrentText(line, start, position);
 			}
 			
 			insideTag = delimiter.isInsideTag();
@@ -97,8 +96,8 @@ public class Parser {
 	}
 
 	private void addInstruction() throws ParseException, SequenceException {
-		appendText();
-		Instruction instruction = delimiter.getTag().toInstruction(); // FIXME temporary
+		Instruction instruction = delimiter.getInstruction();
+		appendCurrentText();
 		
 		// TODO manage partials
 		
@@ -107,11 +106,21 @@ public class Parser {
 		}
 	}
 
-	private void appendText() throws SequenceException {
-		currentText.append( delimiter.trailingBlanks() );
+	private void appendCurrentText() throws SequenceException {
+		// appends the blanks ommited in updateCurrentText() if needed
+		currentText.append( delimiter.getTextTrailingBlanks() );
 		if (currentText.length() > 0) {
 			sequencer.add(Instruction.Action.APPEND_TEXT, currentText.toString());
 		}
 		currentText = new StringBuilder();
+	}
+
+	private void updateCurrentText(String line, int start, int position) {
+		String textBefore = line.substring(start, position);
+		// do not update with blanks at the begining of the line,
+		// potentially opening a standalone tag !! see appendCurrentText()
+		if (start != 0 || textBefore.trim().length() > 0) {
+			currentText.append(textBefore);
+		}
 	}
 }

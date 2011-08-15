@@ -3,6 +3,8 @@ package mustache.parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mustache.core.Instruction;
+
 final class Delimiter {
 	private static final Pattern CHANGE_DELIMITER_PATTERN = Pattern.compile("^\\=\\s*([^= ]+)\\s*([^= ]+)\\s*\\=$");
 	
@@ -19,10 +21,10 @@ final class Delimiter {
 	private boolean normalPrecedesUnescaped = false;
 	private boolean insideTag = false;
 	private boolean insideUnescapedTag = false;
-	private boolean mightBeStandaloneTag = false;
-	private String leadingBlanks = "";
 	
-	Delimiter() { }
+	private String textTrailingBlanks = "";
+	private String tagLineStart = "";
+	private String tagLineEnd = "";
 	
 	boolean isInsideTag() {
 		return insideTag | insideUnescapedTag;
@@ -32,19 +34,25 @@ final class Delimiter {
 		return insideTag ? start.length() : UNESCAPED_START.length();
 	}
 
-	Tag getTag() throws ParseException {
+	Instruction getInstruction() throws ParseException {
 		Tag tag = createTag();
-		
-		if (mightBeStandaloneTag && tag.canBeStandalone()) {
-			// TODO check end of line
-		}
-		
-		return tag;
+		textTrailingBlanks = calculateTextTrailingBlanks(tag);
+		return tag.toInstruction();
 	}
 
-	String trailingBlanks() {
-		// TODO Auto-generated method stub
-		return "";
+	private String calculateTextTrailingBlanks(Tag tag) {
+		boolean startBlank = tagLineStart.trim().length() == 0;
+		if ( !tag.canBeStandalone() ) {
+			return startBlank ? tagLineStart : "";
+		}
+		boolean endBlank = tagLineEnd.trim().length() == 0;
+		return startBlank & endBlank ? "" : tagLineStart;
+	}
+
+	String getTextTrailingBlanks() {
+		String value = textTrailingBlanks;
+		textTrailingBlanks = "";
+		return value.trim().length() == 0 ? value : "";
 	}
 
 	private Tag createTag() throws ParseException {
@@ -96,7 +104,9 @@ final class Delimiter {
 		if (tagPosition >= 0) {
 			currentTag.append( line.substring(position, tagPosition) );
 			insideTag = false;
-			return tagPosition + stop.length();
+			int tagEndPosition = tagPosition + stop.length();
+			tagLineEnd = line.substring(tagEndPosition);
+			return tagEndPosition;
 		}
 		
 		currentTag.append( line.substring(position) );
@@ -109,7 +119,9 @@ final class Delimiter {
 		if (unescapedTagPosition >= 0) {
 			currentTag.append( line.substring(position, unescapedTagPosition) );
 			insideUnescapedTag = false;
-			return unescapedTagPosition + Delimiter.UNESCAPED_STOP.length();
+			int tagEndPosition = unescapedTagPosition + Delimiter.UNESCAPED_STOP.length();
+			tagLineEnd = line.substring(tagEndPosition);
+			return tagEndPosition;
 		}
 
 		currentTag.append( line.substring(position) );
@@ -117,26 +129,18 @@ final class Delimiter {
 	}
 	
 	private int searchTag(String line, int position) {
+		tagLineEnd = "";
+		
 		int tagPosition = line.indexOf(start, position);
 		int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_START, position);
 		
 		if (tagPosition >= 0 | unescapedTagPosition >= 0) {
 			int actualTagPosition = openTag(tagPosition, unescapedTagPosition);
-			updateStandaloneFlag(line, actualTagPosition);
+			this.tagLineStart = line.substring(0, actualTagPosition);
 			return actualTagPosition;
 		}
 		
 		return line.length();
-	}
-	
-	private void updateStandaloneFlag(String line, int actualTagPosition) {
-		if (insideUnescapedTag) {
-			mightBeStandaloneTag = false;
-			return;
-		}
-		String lineStart = line.substring(0, actualTagPosition);
-		mightBeStandaloneTag = lineStart.trim().equals("");
-		leadingBlanks = mightBeStandaloneTag ? lineStart : "";
 	}
 
 	private int openTag(int tagPosition, int unescapedTagPosition) {
