@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import mustache.core.Instruction;
+import mustache.core.Processor;
 import mustache.core.SequenceException;
 import mustache.core.Sequencer;
 
@@ -14,16 +15,16 @@ import org.apache.commons.io.IOUtils;
 
 public class Parser {
 	
-	public static Sequencer parseString(String string) throws ParseException, IOException {
+	public static Processor parseString(String string) throws ParseException, IOException {
 		Reader reader = new StringReader(string);
 		return new Parser(reader).parse();
 	}
 	
-	public static Sequencer parseReadable(Readable string) throws ParseException, IOException {
-		return new Parser(string).parse();
+	public static Processor parseReadable(Readable readable) throws ParseException, IOException {
+		return new Parser(readable).parse();
 	}
 	
-	public static Sequencer parseFile(File file) throws ParseException, IOException {
+	public static Processor parseFile(File file) throws ParseException, IOException {
 		Reader reader = null;
 		try {
 			reader = new FileReader(file);
@@ -33,7 +34,7 @@ public class Parser {
 		}
 	}
 	
-	public static Sequencer parseFile(String path) throws ParseException, IOException {
+	public static Processor parseFile(String path) throws ParseException, IOException {
 		return parseFile( new File(path) );
 	}
 	
@@ -45,7 +46,7 @@ public class Parser {
 		reader = LineIterator.fromReadable(readable);
 	}
 	
-	private Sequencer parse() throws ParseException, IOException {
+	private Processor parse() throws ParseException, IOException {
 		try {
 			int lineNumber = 1;
 			while (reader.hasNext()) {
@@ -53,7 +54,10 @@ public class Parser {
 				lineNumber++;
 			}
 			addLastToken();
-			return sequencer;
+			if ( !sequencer.isProcessable() ) {
+				throw new ParseException("Invalid template");
+			}
+			return Processor.fromSequencer(sequencer);
 		}
 		catch (SequenceException e) {
 			throw new ParseException(e.getMessage(), e);
