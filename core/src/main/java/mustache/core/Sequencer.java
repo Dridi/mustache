@@ -4,7 +4,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The {@code Sequencer} class manipulates a sequence of {@link Instruction}s
@@ -22,6 +24,7 @@ public final class Sequencer {
 
 	private Deque<String> sections = new ArrayDeque<String>();
 	private List<Instruction> sequence = new ArrayList<Instruction>();
+	private Set<String> partials = new HashSet<String>();
 	
 	/**
 	 * Adds a legal {@link Instruction} in the sequence.
@@ -105,6 +108,10 @@ public final class Sequencer {
 	 */
 	public boolean isProcessable() {
 		return sequence.size() > 0 && sections.size() == 0;
+	}
+
+	public List<String> getPartials() {
+		return new ArrayList<String>(partials);
 	}
 	
 	/**
