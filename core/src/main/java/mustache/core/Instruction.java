@@ -97,9 +97,18 @@ public final class Instruction implements Serializable {
 		if (action != Action.ENTER_PARTIAL) {
 			throw new IllegalStateException("Partials don't embed raw data");
 		}
-		return "\t"; // FIXME extract indentation
+		int i = 0;
+		while (i < data.length() && isBlank(i)) {
+			i++;
+		}
+		return data.substring(0, i);
 	}
 	
+	private boolean isBlank(int i) {
+		char c = data.charAt(i);
+		return c == ' ' || c == '\t';
+	}
+
 	public String getPartial() {
 		if (action != Action.ENTER_PARTIAL) {
 			throw new IllegalStateException("Partials don't embed raw data");

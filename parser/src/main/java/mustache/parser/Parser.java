@@ -108,9 +108,6 @@ public class Parser {
 	private void addInstruction() throws ParseException, SequenceException, IOException {
 		Instruction instruction = delimiter.getInstruction();
 		appendCurrentText();
-		
-		// TODO manage partials
-		
 		if (instruction != null) {
 			sequencer.add(instruction);
 			loadPartial(instruction);

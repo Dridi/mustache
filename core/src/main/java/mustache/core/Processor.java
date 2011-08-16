@@ -50,7 +50,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 * @throws NullPointerException if {@code sequencer} is {@code null}
 	 * @throws IllegalArgumentException if {@code sequencer} is not processable
 	 * @see Sequencer#isProcessable()
-	 * FIXME this method shall disappear
 	 */
 	public static Processor fromSequencer(Sequencer sequencer) {
 		Map<String, Processor> partials = Collections.emptyMap();
@@ -155,12 +154,18 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			instruction = indentText(instruction);
 		}
 		else if (instruction.getAction() == Action.ENTER_PARTIAL) {
-			currentPartial = partials.get( instruction.getPartial() );
-			currentPartial.indentation = instruction.getIndentation();
+			initSafePartial(instruction);
 		}
 		tryOpeningSection = instruction.opening();
 		tryClosingSection = instruction.closing();
 		return instruction;
+	}
+
+	public void initSafePartial(Instruction instruction) {
+		Processor partial = partials.get( instruction.getPartial() );
+		currentPartial = new Processor(partial.sequence);
+		currentPartial.partials.putAll(partial.partials);
+		currentPartial.indentation = indentation + instruction.getIndentation();
 	}
 
 	private Instruction indentText(Instruction instruction) {
