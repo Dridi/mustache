@@ -37,7 +37,13 @@ final class Delimiter {
 	Instruction getInstruction() throws ParseException {
 		Tag tag = createTag();
 		textTrailingBlanks = calculateTextTrailingBlanks(tag);
-		return tag.toInstruction();
+		
+		Instruction instruction = tag.toInstruction();
+		if (instruction.getAction() != Instruction.Action.ENTER_PARTIAL) {
+			return instruction;
+		}
+		
+		return Instruction.newInstance(Instruction.Action.ENTER_PARTIAL, getTextTrailingBlanks() + instruction.getPartial());
 	}
 
 	private String calculateTextTrailingBlanks(Tag tag) {

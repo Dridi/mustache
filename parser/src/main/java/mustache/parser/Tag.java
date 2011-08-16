@@ -24,7 +24,7 @@ final class Tag {
 		Type type = Type.fromToken( matcher.group(1) );
 		String content = matcher.group(2);
 		
-		if ( type.action != null && !Context.isValidQuery(content) ) {
+		if ( type != Type.PARTIAL && type.action != null && !Context.isValidQuery(content) ) {
 			throw new ParseException("Invalid tag content : " + content);
 		}
 		
@@ -53,7 +53,7 @@ final class Tag {
 	}
 
 	boolean canBeStandalone() {
-		return type != Type.VARIABLE & type != Type.UNESCAPED_VARIABLE;
+		return type != Type.VARIABLE & type != Type.UNESCAPED_VARIABLE & type != Type.PARTIAL;
 	}
 	
 	Instruction toInstruction() {
@@ -70,7 +70,7 @@ final class Tag {
 		SECTION("#", Instruction.Action.OPEN_SECTION),
 		INVERTED_SECTION("^", Instruction.Action.OPEN_INVERTED_SECTION),
 		SECTION_END("/", Instruction.Action.CLOSE_SECTION),
-		PARTIAL(">", null),
+		PARTIAL(">", Instruction.Action.ENTER_PARTIAL),
 		DELIMITER("=", null),
 		COMMENT("!", null);
 		

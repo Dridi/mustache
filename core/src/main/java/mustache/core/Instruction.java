@@ -24,7 +24,8 @@ public final class Instruction implements Serializable {
 		APPEND_UNESCAPED_VARIABLE,
 		OPEN_SECTION,
 		OPEN_INVERTED_SECTION,
-		CLOSE_SECTION;
+		CLOSE_SECTION,
+		ENTER_PARTIAL;
 	}
 	
 	private final Action action;
@@ -47,7 +48,12 @@ public final class Instruction implements Serializable {
 			throw new NullPointerException();
 		}
 		
-		if (action != Action.APPEND_TEXT && !Context.isValidQuery(data)) {
+		if (action == Action.ENTER_PARTIAL) {
+			if (data.trim().length() == 0) {
+				throw new IllegalArgumentException("Invalid partial : " + data);
+			}
+		}
+		else if (action != Action.APPEND_TEXT && !Context.isValidQuery(data)) {
 			throw new IllegalArgumentException("Invalid interpolation : " + data);
 		}
 		
@@ -81,7 +87,24 @@ public final class Instruction implements Serializable {
 	 * @return the {@code Instruction} data
 	 */
 	public String getData() {
+		if (action == Action.ENTER_PARTIAL) {
+			throw new IllegalStateException("Partials don't embed raw data");
+		}
 		return data;
+	}
+	
+	public String getIndentation() {
+		if (action != Action.ENTER_PARTIAL) {
+			throw new IllegalStateException("Partials don't embed raw data");
+		}
+		return "\t"; // FIXME extract indentation
+	}
+	
+	public String getPartial() {
+		if (action != Action.ENTER_PARTIAL) {
+			throw new IllegalStateException("Partials don't embed raw data");
+		}
+		return data.trim();
 	}
 	
 	/**

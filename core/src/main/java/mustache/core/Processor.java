@@ -25,24 +25,22 @@ import mustache.core.Instruction.Action;
  * @author Dri
  */
 public final class Processor implements Serializable, Iterator<Instruction> {
-	
 	private static final long serialVersionUID = 289040399110456725L;
 
 	private final List<Instruction> sequence;
 	private final Map<String, Processor> partials;
-	private final String indentation;
 	
 	private final transient int maxPosition;
 	private transient int currentPosition = -1;
 	private transient boolean tryOpeningSection;
 	private transient boolean tryClosingSection;
 	private transient Processor currentPartial;
+	private transient String indentation = "";
 	
-	private Processor(List<Instruction> sequence, String indentation) {
+	private Processor(List<Instruction> sequence) {
 		this.sequence = sequence;
 		this.maxPosition = sequence.size() - 1;
 		this.partials = new HashMap<String, Processor>();
-		this.indentation = indentation;
 	}
 	
 	/**
@@ -56,22 +54,21 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 */
 	public static Processor fromSequencer(Sequencer sequencer) {
 		Map<String, Processor> partials = Collections.emptyMap();
-		return newInstance(sequencer, partials, "\t");
+		return newInstance(sequencer, partials);
 	}
 
-	public static Processor newInstance(Sequencer sequencer, Map<String, Processor> partials, String indentation) {
-		if (sequencer == null || partials == null || indentation == null) {
+	public static Processor newInstance(Sequencer sequencer, Map<String, Processor> partials) {
+		if (sequencer == null || partials == null) {
 			throw new NullPointerException();
-		}
-		if (indentation.trim().length() != 0) { // FIXME should only match spaces and tabulations
-			throw new IllegalArgumentException("Indentation must be blank, not : " + indentation);
 		}
 		synchronized (sequencer) {
 			if ( !sequencer.isProcessable() ) {
 				throw new IllegalArgumentException("Sequence not processable");
 			}
 			// TODO match partials map against sequencer partials list
-			return new Processor(sequencer.getSequence(), indentation);
+			Processor processor = new Processor(sequencer.getSequence());
+			processor.partials.putAll(partials);
+			return processor;
 		}
 	}
 	
@@ -137,7 +134,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			throw new IllegalStateException();
 		}
 		
-		if (currentPartial != null) {
+		if (currentPartial != null && currentPartial.hasNext()) {
 			return currentPartial.next();
 		}
 		
@@ -157,9 +154,12 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		if (instruction.getAction() == Action.APPEND_TEXT) {
 			instruction = indentText(instruction);
 		}
+		else if (instruction.getAction() == Action.ENTER_PARTIAL) {
+			currentPartial = partials.get( instruction.getPartial() );
+			currentPartial.indentation = instruction.getIndentation();
+		}
 		tryOpeningSection = instruction.opening();
 		tryClosingSection = instruction.closing();
-		// TODO manage partials
 		return instruction;
 	}
 
@@ -226,17 +226,15 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		
 		private final List<Instruction> sequence;
 		private final Map<String, Processor> partials;
-		private final String indentation;
 
 		SerializationProxy(Processor processor) {
 			this.sequence = processor.sequence;
 			this.partials = processor.partials;
-			this.indentation = processor.indentation;
 		}
 		
 		private Object readResolve() throws StreamCorruptedException {
 			try {
-				return Processor.newInstance(new Sequencer().addAll(sequence), partials, indentation);
+				return Processor.newInstance(new Sequencer().addAll(sequence), partials);
 			} catch (SequenceException e) {
 				StreamCorruptedException streamCorruptedException = new StreamCorruptedException( e.getMessage() );
 				streamCorruptedException.initCause(e);
