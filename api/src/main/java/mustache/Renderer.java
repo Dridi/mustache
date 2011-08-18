@@ -2,12 +2,10 @@ package mustache;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
-import mustache.core.Context;
 import mustache.core.Instruction;
 import mustache.core.Processor;
+import mustache.core.SectionStack;
 
 public class Renderer {
 
@@ -19,13 +17,12 @@ public class Renderer {
 	}
 	
 	private final Processor processor;
-	private final Deque<Context> contexts; // FIXME list of sections
+	private final SectionStack sectionStack;
 	private final Writer writer;
 	
 	private Renderer(Processor processor, Object data, Writer writer) {
 		this.processor = processor;
-		this.contexts = new ArrayDeque<Context>();
-		this.contexts.addFirst( Context.newInstance(data) );
+		sectionStack = new SectionStack(data);
 		this.writer = writer;
 	}
 
@@ -79,8 +76,9 @@ public class Renderer {
 	}
 
 	private void closeSection(String interpolation) {
-		// TODO Auto-generated method stub
-		
+		if (sectionStack.closeSection()) {
+			processor.exitSection();
+		}
 	}
 	
 }

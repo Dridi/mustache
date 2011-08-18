@@ -136,6 +136,9 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		if (currentPartial != null && currentPartial.hasNext()) {
 			return currentPartial.next();
 		}
+		else {
+			currentPartial = null;
+		}
 		
 		if (tryOpeningSection) {
 			skipSection();
