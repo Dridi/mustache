@@ -23,9 +23,15 @@ class Section {
 		section.contexts.add(context);
 		return section;
 	}
+	
+	static Section nestedSection(String name, List<Context> contexts) {
+		Section section = new Section(name);
+		section.contexts.addAll(contexts);
+		return section;
+	}
 
 	boolean hasBaseVariable(String query) {
-		return contexts.peek().hasBaseVariable(query);
+		return contexts.element().hasBaseVariable(query);
 	}
 
 	Object getVariable(String query) {
@@ -38,7 +44,7 @@ class Section {
 		if (contexts.isEmpty() ^ inverted) {
 			return null;
 		}
-		return null; //FIXME return the section
+		return nestedSection(query, contexts);
 	}
 	
 	private List<?> coerce(Object value) {
