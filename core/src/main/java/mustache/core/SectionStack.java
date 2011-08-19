@@ -26,7 +26,7 @@ public class SectionStack {
 	}
 
 	public boolean openSection(String query) {
-		Section section = sections.element().open(query, true);
+		Section section = sections.element().open(query, false);
 		if (section != null) {
 			sections.push(section);
 		}
