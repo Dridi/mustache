@@ -12,10 +12,16 @@ public class SectionStack {
 		this.sections.addFirst( Section.rootSection(root) );
 	}
 	
-	public Object getVariable(String query) {
-		return sections.getLast().getVariable(query);
+	public String getValue(String query) {
+		for (Section section : sections) { // TODO iterates from last to first in the deque ?
+			if (section.hasBaseVariable(query)) {
+				Object value = section.getVariable(query);
+				return value == null ? "" : value.toString();
+			}
+		}
+		return "";
 	}
-	
+
 	public boolean openSection(String query) {
 		// TODO Auto-generated method
 		return false;
@@ -29,7 +35,7 @@ public class SectionStack {
 	public boolean closeSection() {
 		boolean close = sections.getFirst().close();
 		if (close) {
-			sections.removeLast();
+			sections.removeFirst();
 		}
 		return close;
 	}

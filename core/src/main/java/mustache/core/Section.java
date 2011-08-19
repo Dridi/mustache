@@ -16,6 +16,10 @@ class Section {
 		return section;
 	}
 
+	boolean hasBaseVariable(String query) {
+		return contexts.peek().hasBaseVariable(query);
+	}
+
 	Object getVariable(String query) {
 		return contexts.peek().interpolate(query);
 	}
@@ -24,5 +28,4 @@ class Section {
 		contexts.poll();
 		return contexts.isEmpty();
 	}
-
 }
