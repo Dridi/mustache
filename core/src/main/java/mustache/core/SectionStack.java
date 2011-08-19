@@ -2,6 +2,7 @@ package mustache.core;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 
 public class SectionStack {
 	
@@ -13,7 +14,9 @@ public class SectionStack {
 	}
 	
 	public String getValue(String query) {
-		for (Section section : sections) { // TODO iterates from last to first in the deque ?
+		Iterator<Section> iterator = sections.descendingIterator();
+		while (iterator.hasNext()) {
+			Section section = iterator.next();
 			if (section.hasBaseVariable(query)) {
 				Object value = section.getVariable(query);
 				return value == null ? "" : value.toString();
