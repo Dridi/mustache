@@ -23,13 +23,19 @@ public class SectionStack {
 	}
 
 	public boolean openSection(String query) {
-		// TODO Auto-generated method
-		return false;
+		Section section = sections.element().open(query, true);
+		if (section != null) {
+			sections.push(section);
+		}
+		return section != null;
 	}
 	
 	public boolean openInvertedSection(String query) {
-		// TODO Auto-generated method
-		return false;
+		Section section = sections.element().open(query, true);
+		if (section != null) {
+			sections.push(section);
+		}
+		return section != null;
 	}
 	
 	public boolean closeSection(String query) {
