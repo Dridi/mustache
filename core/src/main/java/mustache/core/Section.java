@@ -24,7 +24,12 @@ class Section {
 	}
 
 	Object getVariable(String query) {
-		return contexts.peek().interpolate(query);
+		return contexts.element().interpolate(query);
+	}
+
+	Section open(String query, boolean inverted) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	boolean close(String query) {
