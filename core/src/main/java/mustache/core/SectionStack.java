@@ -9,7 +9,7 @@ public class SectionStack {
 	
 	public SectionStack(Object root) {
 		this.sections = new ArrayDeque<Section>();
-		this.sections.addFirst( Section.rootSection(root) );
+		this.sections.push( Section.rootSection(root) );
 	}
 	
 	public String getValue(String query) {
@@ -35,7 +35,7 @@ public class SectionStack {
 	public boolean closeSection() {
 		boolean close = sections.getFirst().close();
 		if (close) {
-			sections.removeFirst();
+			sections.pop();
 		}
 		return close;
 	}

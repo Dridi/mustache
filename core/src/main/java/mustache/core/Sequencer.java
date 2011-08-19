@@ -50,7 +50,7 @@ public final class Sequencer {
 	
 	private void updateSectionStack(Instruction instruction) throws SequenceException {
 		if ( instruction.opening() ) {
-			sections.addFirst( instruction.getData() );
+			sections.push( instruction.getData() );
 		}
 		else if( instruction.closing() ) {
 			closeSection( instruction.getData() );
@@ -65,7 +65,7 @@ public final class Sequencer {
 		String current = sections.peekFirst();
 		
 		if ( current.equals(section) ) {
-			sections.removeFirst();
+			sections.pop();
 		}
 		else {
 			throw new SequenceException("Expected to close " + current + " not " + section);
