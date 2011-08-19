@@ -78,7 +78,7 @@ public class Renderer {
 	}
 
 	private void closeSection(String interpolation) {
-		if ( sectionStack.closeSection() ) {
+		if ( sectionStack.closeSection(interpolation) ) {
 			processor.exitSection();
 		}
 	}

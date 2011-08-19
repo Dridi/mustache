@@ -32,8 +32,8 @@ public class SectionStack {
 		return false;
 	}
 	
-	public boolean closeSection() {
-		boolean close = sections.getFirst().close();
+	public boolean closeSection(String query) {
+		boolean close = sections.element().close(query);
 		if (close) {
 			sections.pop();
 		}

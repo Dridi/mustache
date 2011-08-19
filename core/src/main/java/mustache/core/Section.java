@@ -5,13 +5,16 @@ import java.util.Queue;
 
 class Section {
 	
+	private final String name;
 	private final Queue<Context> contexts = new LinkedList<Context>();
 	
-	private Section() { }
+	private Section(String name) {
+		this.name = name;
+	}
 	
 	static Section rootSection(Object root) {
 		Context context = Context.newInstance(root);
-		Section section = new Section();
+		Section section = new Section(null);
 		section.contexts.add(context);
 		return section;
 	}
@@ -24,7 +27,13 @@ class Section {
 		return contexts.peek().interpolate(query);
 	}
 	
-	boolean close() {
+	boolean close(String query) {
+		if (name == null) {
+			throw new IllegalStateException("Trying to close the root section with query : " + query);
+		}
+		if ( !name.equals(query) ) {
+			throw new IllegalArgumentException("Expected to close " + name + " not " + query);
+		}
 		contexts.poll();
 		return contexts.isEmpty();
 	}
