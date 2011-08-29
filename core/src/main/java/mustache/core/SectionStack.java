@@ -13,7 +13,7 @@ public class SectionStack {
 	}
 	
 	public String getValue(String query) {
-		for (Section section : sections) { // TODO iterates from last to first in the deque ?
+		for (Section section : sections) {
 			if (section.hasBaseVariable(query)) {
 				Object value = section.getVariable(query);
 				return value == null ? "" : value.toString();

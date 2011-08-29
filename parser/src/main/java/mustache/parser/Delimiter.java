@@ -21,6 +21,7 @@ final class Delimiter {
 	private boolean normalPrecedesUnescaped = false;
 	private boolean insideTag = false;
 	private boolean insideUnescapedTag = false;
+	private boolean isUnescapedTag;
 	
 	private String textTrailingBlanks = "";
 	private String tagLineStart = "";
@@ -65,7 +66,7 @@ final class Delimiter {
 		String content = currentTag.toString().trim();
 		currentTag = new StringBuilder();
 		
-		if (insideUnescapedTag) {
+		if (isUnescapedTag) {
 			return Tag.newUnescapedTag(content);
 		}
 		
@@ -110,6 +111,7 @@ final class Delimiter {
 		if (tagPosition >= 0) {
 			currentTag.append( line.substring(position, tagPosition) );
 			insideTag = false;
+			isUnescapedTag = false;
 			int tagEndPosition = tagPosition + stop.length();
 			tagLineEnd = line.substring(tagEndPosition);
 			return tagEndPosition;
@@ -125,6 +127,7 @@ final class Delimiter {
 		if (unescapedTagPosition >= 0) {
 			currentTag.append( line.substring(position, unescapedTagPosition) );
 			insideUnescapedTag = false;
+			isUnescapedTag = true;
 			int tagEndPosition = unescapedTagPosition + Delimiter.UNESCAPED_STOP.length();
 			tagLineEnd = line.substring(tagEndPosition);
 			return tagEndPosition;
