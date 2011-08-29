@@ -12,30 +12,42 @@ public class SectionStack {
 		this.sections.push( Section.rootSection(root) );
 	}
 	
-	public String getValue(String query) {
+	private Section findSection(String query) {
 		for (Section section : sections) {
 			if (section.hasBaseVariable(query)) {
-				Object value = section.getVariable(query);
-				return value == null ? "" : value.toString();
+				return section;
 			}
 		}
-		return "";
+		return null;
+	}
+	
+	public String getValue(String query) {
+		Section section = findSection(query);
+		if (section == null) {
+			return "";
+		}
+		Object value = section.getVariable(query);
+		return value == null ? "" : value.toString();
+	}
+
+	private boolean openSection(String query, boolean inverted) {
+		Section section = findSection(query);
+		if (section == null) {
+			return false;
+		}
+		Section newSection = section.open(query, inverted);
+		if (newSection != null) {
+			sections.push(newSection);
+		}
+		return newSection != null;
 	}
 
 	public boolean openSection(String query) {
-		Section section = sections.element().open(query, false);
-		if (section != null) {
-			sections.push(section);
-		}
-		return section != null;
+		return openSection(query, false);
 	}
 	
 	public boolean openInvertedSection(String query) {
-		Section section = sections.element().open(query, true);
-		if (section != null) {
-			sections.push(section);
-		}
-		return section != null;
+		return openSection(query, true);
 	}
 	
 	public boolean closeSection(String query) {
