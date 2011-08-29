@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 
  * @author Dri
  */
-public final class Instruction implements Serializable {
+public final class Instruction implements Processable {
 	
 	private static final long serialVersionUID = 7976280972290440553L;
 	
