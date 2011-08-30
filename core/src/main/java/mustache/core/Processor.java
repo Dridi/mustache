@@ -118,7 +118,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 */
 	@Override
 	public boolean hasNext() {
-		return currentPosition < maxPosition;
+		return currentPosition < maxPosition || (currentPartial != null && currentPartial.hasNext());
 	}
 
 	/**
@@ -166,6 +166,9 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 
 	public void initSafePartial(Instruction instruction) {
 		Processor partial = partials.get( instruction.getPartial() );
+		if (partial == null) {
+		    partial = this; // FIXME better management of recursive partials
+		}
 		currentPartial = new Processor(partial.sequence);
 		currentPartial.partials.putAll(partial.partials);
 		currentPartial.indentation = indentation + instruction.getIndentation();

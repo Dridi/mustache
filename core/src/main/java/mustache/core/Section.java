@@ -1,5 +1,6 @@
 package mustache.core;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,10 +32,16 @@ class Section {
 	}
 
 	boolean hasBaseVariable(String query) {
+	    if ( contexts.isEmpty() ) {
+	        return false;
+	    }
 		return contexts.element().hasBaseVariable(query);
 	}
 
 	Object getVariable(String query) {
+        if ( contexts.isEmpty() ) {
+            return null;
+        }
 		return contexts.element().interpolate(query);
 	}
 
@@ -48,6 +55,7 @@ class Section {
 	}
 	
 	private List<?> coerce(Object value) {
+		// FIXME check if empty lists actually work
 		if (value == null) {
 			return Collections.emptyList();
 		}
@@ -76,5 +84,13 @@ class Section {
 		}
 		contexts.poll();
 		return contexts.isEmpty();
+	}
+
+	@Override
+	public String toString() {
+		if (name == null) {
+			return MessageFormat.format("Root{0}({1})", getClass().getSimpleName(), contexts.size());
+		}
+		return MessageFormat.format("{0}:{1}({2})", getClass().getSimpleName(), name, contexts.size());
 	}
 }

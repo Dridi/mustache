@@ -126,7 +126,11 @@ public class Parser {
 		if ( partials.containsKey(partial) ) {
 			return;
 		}
-		partials.put(partial, partialLoader.loadPartial(partial) );
+		partials.put(partial, null);
+		Readable readable = partialLoader.loadPartial(partial);
+		Parser parser = new Parser(readable, partialLoader);
+		parser.partials.putAll(partials);
+        partials.put(partial, parser.parse());
 	}
 
 	private void appendCurrentText() throws SequenceException {

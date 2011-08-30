@@ -40,6 +40,10 @@ final class Delimiter {
 		textTrailingBlanks = calculateTextTrailingBlanks(tag);
 		
 		Instruction instruction = tag.toInstruction();
+		if (instruction == null) {
+			return null;
+		}
+		
 		if (instruction.getAction() != Instruction.Action.ENTER_PARTIAL) {
 			return instruction;
 		}
