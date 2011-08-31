@@ -54,10 +54,8 @@ public class Parser {
 	
 	private Processor parse() throws ParseException, IOException {
 		try {
-			int lineNumber = 1;
 			while (reader.hasNext()) {
-				parseLine(reader.next(), lineNumber);
-				lineNumber++;
+				parseLine(reader.next());
 			}
 			addLastToken();
 			if ( !sequencer.isProcessable() ) {
@@ -83,7 +81,7 @@ public class Parser {
 	private StringBuilder currentText = new StringBuilder();
 	private boolean insideTag = false;
 	
-	private void parseLine(String line, int lineNumber) throws SequenceException, ParseException, IOException {
+	private void parseLine(String line) throws SequenceException, ParseException, IOException {
 		int position = 0;
 		
 		while (position < line.length()) {
@@ -144,9 +142,12 @@ public class Parser {
 
 	private void updateCurrentText(String line, int start, int position) {
 		String textBefore = line.substring(start, position);
-		// do not update with blanks at the begining of the line,
+		// do not update with blanks at the bounds of the line,
 		// potentially opening a standalone tag !! see appendCurrentText()
 		if (start != 0 || textBefore.trim().length() > 0) {
+			currentText.append(textBefore);
+		}
+		else if (position < line.length()  && textBefore.trim().length() > 0) {
 			currentText.append(textBefore);
 		}
 	}
