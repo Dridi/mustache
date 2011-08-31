@@ -17,6 +17,7 @@ final class Delimiter {
 	private String start = DEFAULT_START;
 	private String stop = DEFAULT_STOP;
 	private StringBuilder currentTag = new StringBuilder();
+	private Tag actualTag;
 	
 	private boolean normalPrecedesUnescaped = false;
 	private boolean insideTag = false;
@@ -36,10 +37,9 @@ final class Delimiter {
 	}
 
 	Instruction getInstruction() throws ParseException {
-		Tag tag = createTag();
-		textTrailingBlanks = calculateTextTrailingBlanks(tag);
+		textTrailingBlanks = calculateTextTrailingBlanks(actualTag);
 		
-		Instruction instruction = tag.toInstruction();
+		Instruction instruction = actualTag.toInstruction();
 		if (instruction == null) {
 			return null;
 		}
@@ -66,19 +66,20 @@ final class Delimiter {
 		return value.trim().length() == 0 ? value : "";
 	}
 
-	private Tag createTag() throws ParseException {
+	private void createTag() throws ParseException {
 		String content = currentTag.toString().trim();
 		currentTag = new StringBuilder();
 		
 		if (isUnescapedTag) {
-			return Tag.newUnescapedTag(content);
+			actualTag = Tag.newUnescapedTag(content);
+			return;
 		}
 		
 		try {
-			return Tag.newTag(content);
+			actualTag = Tag.newTag(content);
 		} catch (ChangeDelimiterException e) {
 			changeDelimiter(content);
-			return e.getTag();
+			actualTag = e.getTag();
 		}
 	}
 	
@@ -99,7 +100,7 @@ final class Delimiter {
 		this.stop = stop;
 	}
 
-	int parse(String line, int position) {
+	int parse(String line, int position) throws ParseException {
 		if (insideTag) {
 			return parseTag(line, position);
 		}
@@ -109,7 +110,7 @@ final class Delimiter {
 		return searchTag(line, position);
 	}
 
-	private int parseTag(String line, int position) {
+	private int parseTag(String line, int position) throws ParseException {
 		int tagPosition = line.indexOf(stop, position);
 		
 		if (tagPosition >= 0) {
@@ -118,14 +119,27 @@ final class Delimiter {
 			isUnescapedTag = false;
 			int tagEndPosition = tagPosition + stop.length();
 			tagLineEnd = line.substring(tagEndPosition);
+			createTag();
+			if ( isStandalone() ) {
+				return line.length();
+			}
 			return tagEndPosition;
 		}
 		
 		currentTag.append( line.substring(position) );
 		return line.length();
 	}
+
+	private boolean isStandalone() {
+		if (actualTag.canBeStandalone() && tagLineStart.trim().length() == 0 && tagLineEnd.trim().length() == 0) {
+			tagLineStart = "";
+			tagLineEnd = "";
+			return true;
+		}
+		return false;
+	}
 	
-	private int parseUnescapedTag(String line, int position) {
+	private int parseUnescapedTag(String line, int position) throws ParseException {
 		int unescapedTagPosition = line.indexOf(Delimiter.UNESCAPED_STOP, position);
 		
 		if (unescapedTagPosition >= 0) {
@@ -134,6 +148,7 @@ final class Delimiter {
 			isUnescapedTag = true;
 			int tagEndPosition = unescapedTagPosition + Delimiter.UNESCAPED_STOP.length();
 			tagLineEnd = line.substring(tagEndPosition);
+			createTag();
 			return tagEndPosition;
 		}
 
@@ -175,6 +190,6 @@ final class Delimiter {
 	}
 	
 	private boolean foundAndBefore(int a, int b) {
-		return a == -1 ? false : b == -1 | a < b;
+		return a < 0 ? false : b < 0 | a < b;
 	}
 }
