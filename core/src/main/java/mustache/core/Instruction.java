@@ -90,6 +90,13 @@ public final class Instruction implements Processable {
 	public String getIndentation() {
 		return indentation;
 	}
+
+	public boolean isEndOfLine() {
+		if (action != Action.APPEND_TEXT) {
+			return false;
+		}
+		return data.endsWith("\r") | data.endsWith("\n");
+	}
 	
 	public Instruction indent(String indentation) {
 		if ( "".equals(indentation) ) {

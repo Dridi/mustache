@@ -2,6 +2,7 @@ package mustache;
 
 import java.io.IOException;
 
+import mustache.core.Indentation;
 import mustache.core.Instruction;
 import mustache.core.Processor;
 import mustache.core.SectionStack;
@@ -21,6 +22,8 @@ public class Renderer {
 	private final SectionStack sectionStack;
 	private final Appendable appendable;
 	
+	private boolean endOfLine;
+	
 	private Renderer(Processor processor, Object data, Appendable appendable) {
 		this.processor = processor;
 		sectionStack = new SectionStack(data);
@@ -35,13 +38,13 @@ public class Renderer {
 			
 			switch ( instruction.getAction() ) {
 			case APPEND_TEXT:
-				appendable.append( instruction.getData() );
+				appendText(instruction.getData(), instruction);
 				break;
 			case APPEND_VARIABLE:
-				appendVariable( instruction.getData() );
+				appendVariable(instruction);
 				break;
 			case APPEND_UNESCAPED_VARIABLE:
-				appendUnescapedVariable( instruction.getData() );
+				appendUnescapedVariable(instruction);
 				break;
 			case OPEN_SECTION:
 				openSection( instruction.getData() );
@@ -53,16 +56,30 @@ public class Renderer {
 				closeSection( instruction.getData() );
 				break;
 			}
+			
+			endOfLine = instruction.isEndOfLine();
 		}
 	}
 
-	private void appendVariable(String interpolation) throws IOException {
-		String value = sectionStack.getValue(interpolation);
+	private void appendText(String text, Instruction instruction) throws IOException {
+		String string = Indentation.indentPartialExceptFirstLine(text, instruction.getIndentation());
+		appendable.append(string);
+	}
+
+	private void appendVariable(Instruction instruction) throws IOException {
+		String value = sectionStack.getValue( instruction.getData() );
+		if (endOfLine) {
+			appendable.append( instruction.getIndentation() );
+		}
 		appendable.append( StringEscapeUtils.escapeHtml(value) );
 	}
 
-	private void appendUnescapedVariable(String interpolation) throws IOException {
-		appendable.append( sectionStack.getValue(interpolation) );
+	private void appendUnescapedVariable(Instruction instruction) throws IOException {
+		String value = sectionStack.getValue( instruction.getData() );
+		if (endOfLine) {
+			appendable.append( instruction.getIndentation() );
+		}
+		appendable.append(value);
 	}
 
 	private void openSection(String interpolation) {
