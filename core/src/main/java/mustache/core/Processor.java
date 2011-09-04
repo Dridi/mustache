@@ -155,7 +155,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		Processable processable = sequence.get(currentPosition);
 		if (processable instanceof Partial) {
 			initSafePartial((Partial) processable);
-			return nextInstruction();
+			return next();
 		}
 		Instruction instruction = (Instruction) processable;
 		tryOpeningSection = instruction.opening();

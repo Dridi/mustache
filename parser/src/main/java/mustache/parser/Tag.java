@@ -63,11 +63,11 @@ final class Tag {
 	}
 	
 	Processable toProcessable() {
-		if (type.action == null) {
-			return null;
-		}
 		if (type == Type.PARTIAL) {
 			return Partial.newInstance(content);
+		}
+		if (type.action == null) {
+			return null;
 		}
 		return Instruction.newInstance(type.action, content);
 	}
