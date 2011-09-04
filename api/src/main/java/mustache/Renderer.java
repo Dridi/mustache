@@ -62,7 +62,7 @@ public class Renderer {
 	}
 
 	private void appendText(String text, Instruction instruction) throws IOException {
-		String string = Indentation.indentPartialExceptFirstLine(text, instruction.getIndentation());
+		String string = Indentation.indentPartialText(text, instruction.getIndentation());
 		appendable.append(string);
 	}
 

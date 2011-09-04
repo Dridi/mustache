@@ -5,14 +5,11 @@ import java.util.regex.Pattern;
 
 // TODO arg checks
 public class Indentation {
-	private static final Pattern REPLACE = Pattern.compile("^|\\r\\n|\\r|\\n");
-	private static final Pattern REPLACE_WITHOUT_FIRST_LINE = Pattern.compile("\\r\\n|\\r|\\n");
-	private static final Pattern REPLACE_PARTIAL = Pattern.compile("^|\\r\\n|\\r|\\n(?!$)");
-	private static final Pattern REPLACE_PARTIAL_WITHOUT_FIRST_LINE = Pattern.compile("\\r\\n|\\r|\\n(?!$)");
+	private static final Pattern INDENT_PARTIAL_TEXT = Pattern.compile("\\r\\n|\\r|\\n(?!$)");
 	
-	public static boolean isIndentation(String data) {
-		for (int i = data.length(); --i > 0;) {
-			char c = data.charAt(i);
+	public static boolean isIndentation(String indentation) {
+		for (int i = indentation.length(); --i > 0;) {
+			char c = indentation.charAt(i);
 			if (c != ' ' && c != '\t') {
 				return false;
 			}
@@ -20,27 +17,14 @@ public class Indentation {
 		return true;
 	}
 	
-	public static String indent(String string, String indentation) {
-		return indent(string, indentation, REPLACE);
-	}
-	
-	public static String indentExceptFirstLine(String string, String indentation) {
-		return indent(string, indentation, REPLACE_WITHOUT_FIRST_LINE);
-	}
-	
-	public static String indentPartial(String string, String indentation) {
-		return indent(string, indentation, REPLACE_PARTIAL);
-	}
-	
-	public static String indentPartialExceptFirstLine(String string, String indentation) {
-		return indent(string, indentation, REPLACE_PARTIAL_WITHOUT_FIRST_LINE);
-	}
-	
-	private static String indent(String string, String indentation, Pattern pattern) {
+	public static String indentPartialText(String string, String indentation) {
 		if (string == null || indentation == null) {
 			throw new NullPointerException();
 		}
+		if ( !isIndentation(indentation) ) {
+			throw new IllegalArgumentException("Invalid indentation : " + indentation);
+		}
 		String replacement = "$0" + Matcher.quoteReplacement(indentation);
-		return pattern.matcher(string).replaceAll(replacement);
+		return INDENT_PARTIAL_TEXT.matcher(string).replaceAll(replacement);
 	}
 }

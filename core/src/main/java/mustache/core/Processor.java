@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import mustache.core.Instruction.Action;
-
 /**
  * The {@code Processor} class iterates through a sequence of {@link Processable}s
  * and needs to be notified to enter or exit sections. {@code Processor}s can be
@@ -171,16 +169,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		currentPartial = new Processor(processor.sequence);
 		currentPartial.partials.putAll(processor.partials);
 		currentPartial.indentation = indentation + partial.getIndentation();
-	}
-
-	private Instruction indentText(Instruction instruction) {
-		if (indentation.length() == 0) {
-			return instruction;
-		}
-		String indentedText = currentPosition == 0
-				? Indentation.indentPartial(instruction.getData(), indentation)
-				: Indentation.indentPartialExceptFirstLine(instruction.getData(), indentation);
-		return Instruction.newInstance(Action.APPEND_TEXT, indentedText);
 	}
 
 	private void reenterSection() {
