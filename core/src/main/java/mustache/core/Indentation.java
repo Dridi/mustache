@@ -3,11 +3,22 @@ package mustache.core;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO arg checks
 public class Indentation {
 	private static final Pattern REPLACE = Pattern.compile("^|\\r\\n|\\r|\\n");
 	private static final Pattern REPLACE_WITHOUT_FIRST_LINE = Pattern.compile("\\r\\n|\\r|\\n");
 	private static final Pattern REPLACE_PARTIAL = Pattern.compile("^|\\r\\n|\\r|\\n(?!$)");
 	private static final Pattern REPLACE_PARTIAL_WITHOUT_FIRST_LINE = Pattern.compile("\\r\\n|\\r|\\n(?!$)");
+	
+	public static boolean isIndentation(String data) {
+		for (int i = data.length(); --i > 0;) {
+			char c = data.charAt(i);
+			if (c != ' ' && c != '\t') {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	public static String indent(String string, String indentation) {
 		return indent(string, indentation, REPLACE);
