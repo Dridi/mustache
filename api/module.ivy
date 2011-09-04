@@ -2,10 +2,14 @@
 	<info organisation="mustache" module="mustache-api" revision="1.0.0" status="integration">
 		<extends organisation="mustache" module="mustache" revision="latest.revision" />
 		<description>High level API for {{Mustache}} templates rendering.</description>
-		<ea:build module="build-std-java" revision="0.2"/>
+		<ea:build module="build-std-java" revision="0.2">
+			<ea:property name="test.integration.run.includes.pattern" value="**/*Test.class"/>
+		</ea:build>
 	</info>
 	<dependencies>
 		<dependency org="mustache" name="mustache-parser" rev="latest.revision" conf="default->default"/>
 		<dependency org="commons-lang" name="commons-lang" rev="2.6" conf="default->default"/>
+		<dependency org="junit" name="junit" rev="4.7" conf="test->default"/>
+		<dependency org="com.google.code.gson" name="gson" rev="1.7.1" conf="test->default"/>
 	</dependencies>
 </ivy-module>
