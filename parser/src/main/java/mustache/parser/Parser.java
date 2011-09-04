@@ -141,13 +141,18 @@ public class Parser {
 	}
 
 	private void updateCurrentText(String line, int start, int position) {
+		if (start == 0 && position == line.length()) {
+			currentText.append(line);
+			return;
+		}
 		String textBefore = line.substring(start, position);
+		int textBeforeTrimmedLength = textBefore.trim().length();
 		// do not update with blanks at the bounds of the line,
 		// potentially opening a standalone tag !! see appendCurrentText()
-		if (start != 0 || textBefore.trim().length() > 0) {
+		if (start != 0 || textBeforeTrimmedLength > 0) {
 			currentText.append(textBefore);
 		}
-		else if (position < line.length()  && textBefore.trim().length() > 0) {
+		else if (position < line.length()  && textBeforeTrimmedLength > 0) {
 			currentText.append(textBefore);
 		}
 	}
