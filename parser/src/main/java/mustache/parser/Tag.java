@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 import mustache.core.Context;
 import mustache.core.Instruction;
+import mustache.core.Partial;
+import mustache.core.Processable;
 
 final class Tag {
 	
@@ -60,11 +62,13 @@ final class Tag {
 		return type == Type.PARTIAL;
 	}
 	
-	Instruction toInstruction() {
+	Processable toProcessable() {
 		if (type.action == null) {
 			return null;
 		}
-		
+		if (type == Type.PARTIAL) {
+			return Partial.newInstance(content);
+		}
 		return Instruction.newInstance(type.action, content);
 	}
 	
@@ -74,7 +78,7 @@ final class Tag {
 		SECTION("#", Instruction.Action.OPEN_SECTION),
 		INVERTED_SECTION("^", Instruction.Action.OPEN_INVERTED_SECTION),
 		SECTION_END("/", Instruction.Action.CLOSE_SECTION),
-		PARTIAL(">", Instruction.Action.ENTER_PARTIAL),
+		PARTIAL(">", null),
 		DELIMITER("=", null),
 		COMMENT("!", null);
 		

@@ -3,7 +3,8 @@ package mustache.parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import mustache.core.Instruction;
+import mustache.core.Partial;
+import mustache.core.Processable;
 
 final class Delimiter {
 	private static final Pattern CHANGE_DELIMITER_PATTERN = Pattern.compile("^\\=\\s*([^= ]+)\\s*([^= ]+)\\s*\\=$");
@@ -36,26 +37,26 @@ final class Delimiter {
 		return insideTag ? start.length() : UNESCAPED_START.length();
 	}
 
-	Instruction getInstruction() throws ParseException {
+	Processable getProcessable() throws ParseException {
 		
-		Instruction instruction = actualTag.toInstruction();
-		if (instruction == null) {
+		Processable processable = actualTag.toProcessable();
+		if (processable == null) {
 			return null;
 		}
 		
-		if (instruction.getAction() != Instruction.Action.ENTER_PARTIAL) {
-			calculateTextTrailingBlanks(actualTag);
-			return instruction;
+		if (processable instanceof Partial) {
+			return createIndentedPartial((Partial) processable);
 		}
 		
-		return createEnterPartialInstruction( instruction.getPartial() );
+		calculateTextTrailingBlanks(actualTag);
+		return processable;
 	}
 
-	private Instruction createEnterPartialInstruction(String name) {
+	private Partial createIndentedPartial(Partial partial) {
 		boolean startBlank = tagLineStart.trim().length() == 0;
 		String indentation = startBlank ? tagLineStart : "";
 		textTrailingBlanks = "";
-		return Instruction.newInstance(Instruction.Action.ENTER_PARTIAL, indentation + name);
+		return Partial.newIndentedInstance(partial.getName(), indentation);
 	}
 
 	private void calculateTextTrailingBlanks(Tag tag) {

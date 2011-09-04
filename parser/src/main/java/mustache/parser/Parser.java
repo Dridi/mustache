@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mustache.core.Instruction;
+import mustache.core.Partial;
+import mustache.core.Processable;
 import mustache.core.Processor;
 import mustache.core.SequenceException;
 import mustache.core.Sequencer;
@@ -89,7 +91,7 @@ public class Parser {
 			position = delimiter.parse(line, position);
 			
 			if (insideTag && !delimiter.isInsideTag()) {
-				addInstruction();
+				addProcessable();
 			}
 			else if (!insideTag && delimiter.isInsideTag()) {
 				updateCurrentText(line, start, position);
@@ -103,32 +105,30 @@ public class Parser {
 		}
 	}
 
-	private void addInstruction() throws ParseException, SequenceException, IOException {
-		Instruction instruction = delimiter.getInstruction();
+	private void addProcessable() throws ParseException, SequenceException, IOException {
+		Processable processable = delimiter.getProcessable();
 		appendCurrentText();
-		if (instruction != null) {
-			sequencer.add(instruction);
-			loadPartial(instruction);
+		if (processable != null) {
+			sequencer.add(processable);
+		}
+		if (processable instanceof Partial) {
+			loadPartial((Partial) processable);
 		}
 	}
 
-	public void loadPartial(Instruction instruction) throws ParseException, IOException {
-		if (instruction.getAction() != Instruction.Action.ENTER_PARTIAL) {
-			return;
-		}
-		
-		String partial = instruction.getPartial();
+	public void loadPartial(Partial partial) throws ParseException, IOException {
+		String name = partial.getName();
 		if (partialLoader == null) {
 			throw new IllegalStateException("Templates expects to load a partial : " + partial);
 		}
-		if ( partials.containsKey(partial) ) {
+		if ( partials.containsKey(name) ) {
 			return;
 		}
-		partials.put(partial, null);
-		Readable readable = partialLoader.loadPartial(partial);
+		partials.put(name, null);
+		Readable readable = partialLoader.loadPartial(name);
 		Parser parser = new Parser(readable, partialLoader);
 		parser.partials.putAll(partials);
-        partials.put(partial, parser.parse());
+        partials.put(name, parser.parse());
 	}
 
 	private void appendCurrentText() throws SequenceException {

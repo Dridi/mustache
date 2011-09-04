@@ -13,9 +13,9 @@ import java.util.Map;
 import mustache.core.Instruction.Action;
 
 /**
- * The {@code Processor} class iterates through a sequence of {@link Instruction}s
+ * The {@code Processor} class iterates through a sequence of {@link Processable}s
  * and needs to be notified to enter or exit sections. {@code Processor}s can be
- * serialized and reused at will but their {@link Instruction}s sequence can not
+ * serialized and reused at will but their {@link Processable}s sequence can not
  * be modified.
  * 
  * <p>This class is not meant for concurrent manipulation by several threads.</p>
@@ -27,7 +27,7 @@ import mustache.core.Instruction.Action;
 public final class Processor implements Serializable, Iterator<Instruction> {
 	private static final long serialVersionUID = 289040399110456725L;
 
-	private final List<Instruction> sequence;
+	private final List<Processable> sequence;
 	private final Map<String, Processor> partials;
 	
 	private final transient int maxPosition;
@@ -37,7 +37,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	private transient Processor currentPartial;
 	private transient String indentation = "";
 	
-	private Processor(List<Instruction> sequence) {
+	private Processor(List<Processable> sequence) {
 		this.sequence = sequence;
 		this.maxPosition = sequence.size() - 1;
 		this.partials = new HashMap<String, Processor>();
@@ -152,26 +152,25 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private Instruction nextInstruction() {
-		Instruction instruction = sequence.get(currentPosition);
-		if (instruction.getAction() == Action.APPEND_TEXT) {
-			instruction = indentText(instruction);
+		Processable processable = sequence.get(currentPosition);
+		if (processable instanceof Partial) {
+			initSafePartial((Partial) processable);
+			return nextInstruction();
 		}
-		else if (instruction.getAction() == Action.ENTER_PARTIAL) {
-			initSafePartial(instruction);
-		}
+		Instruction instruction = (Instruction) processable;
 		tryOpeningSection = instruction.opening();
 		tryClosingSection = instruction.closing();
-		return instruction;
+		return instruction.indent(indentation);
 	}
 
-	public void initSafePartial(Instruction instruction) {
-		Processor partial = partials.get( instruction.getPartial() );
-		if (partial == null) {
-		    partial = this; // FIXME better management of recursive partials
+	public void initSafePartial(Partial partial) {
+		Processor processor = partials.get( partial.getName() );
+		if (processor == null) {
+		    processor = this; // FIXME better management of recursive partials
 		}
-		currentPartial = new Processor(partial.sequence);
-		currentPartial.partials.putAll(partial.partials);
-		currentPartial.indentation = indentation + instruction.getIndentation();
+		currentPartial = new Processor(processor.sequence);
+		currentPartial.partials.putAll(processor.partials);
+		currentPartial.indentation = indentation + partial.getIndentation();
 	}
 
 	private Instruction indentText(Instruction instruction) {
@@ -211,12 +210,16 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private int openCloseDelta() {
-		Instruction instruction = sequence.get(currentPosition);
+		Processable processable = sequence.get(currentPosition);
+		if (processable instanceof Partial) {
+			return 0;
+		}
+		Instruction instruction = (Instruction) processable;
 		return instruction.opening() ? 1 : instruction.closing() ? -1 : 0;
 	}
 	
 	/**
-	 * Cannot remove {@code Instruction}s from the sequence.
+	 * Cannot remove {@code Processable}s from the sequence.
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
@@ -235,7 +238,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	private static class SerializationProxy implements Serializable {
 		private static final long serialVersionUID = 7682273649183979614L;
 		
-		private final List<Instruction> sequence;
+		private final List<Processable> sequence;
 		private final Map<String, Processor> partials;
 
 		SerializationProxy(Processor processor) {

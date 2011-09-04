@@ -3,9 +3,12 @@ package mustache.core;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
- * This class represents a {@link Mustache} instruction. An {@code Instruction}
+ * This class represents a {@link Mustache} instruction. An {@link Instruction}
  * is basically represented by an action and data associated to it. Instances of
  * this class are immutable and can be shared safely among multiple threads.
  * 
@@ -24,12 +27,13 @@ public final class Instruction implements Processable {
 		APPEND_UNESCAPED_VARIABLE,
 		OPEN_SECTION,
 		OPEN_INVERTED_SECTION,
-		CLOSE_SECTION,
-		ENTER_PARTIAL;
+		CLOSE_SECTION;
 	}
 	
 	private final Action action;
 	private final String data;
+	
+	private transient String indentation = "";
 
 	private Instruction(Action action, String data) {
 		this.action = action;
@@ -37,26 +41,19 @@ public final class Instruction implements Processable {
 	}
 	
 	/**
-	 * Creates a new {@code Instruction}.
-	 * @param action the type of {@code Instruction}
-	 * @param data the data associated to the {@code Instruction}
-	 * @return a newly created {@code Instruction}
+	 * Creates a new {@link Instruction}.
+	 * @param action the type of {@link Instruction}
+	 * @param data the data associated to the {@link Instruction}
+	 * @return a newly created {@link Instruction}
 	 * @throws NullPointerException if {@code action} or {@code data} is {@code null}
 	 */
 	public static Instruction newInstance(Action action, String data) {
 		if (action == null | data == null) {
 			throw new NullPointerException();
 		}
-		
-		if (action == Action.ENTER_PARTIAL) {
-			if (data.trim().length() == 0) {
-				throw new IllegalArgumentException("Invalid partial : " + data);
-			}
-		}
-		else if (action != Action.APPEND_TEXT && !Context.isValidQuery(data)) {
+		if (action != Action.APPEND_TEXT && !Context.isValidQuery(data)) {
 			throw new IllegalArgumentException("Invalid interpolation : " + data);
 		}
-		
 		return new Instruction(action, data);
 	}
 	
@@ -87,41 +84,37 @@ public final class Instruction implements Processable {
 	 * @return the {@code Instruction} data
 	 */
 	public String getData() {
-		if (action == Action.ENTER_PARTIAL) {
-			throw new IllegalStateException("Partials don't embed raw data");
-		}
 		return data;
 	}
 	
 	public String getIndentation() {
-		if (action != Action.ENTER_PARTIAL) {
-			throw new IllegalStateException("Partials don't embed raw data");
-		}
-		int i = 0;
-		while (i < data.length() && isBlank(i)) {
-			i++;
-		}
-		return data.substring(0, i);
+		return indentation;
 	}
 	
-	private boolean isBlank(int i) {
-		char c = data.charAt(i);
-		return c == ' ' || c == '\t';
-	}
-
-	public String getPartial() {
-		if (action != Action.ENTER_PARTIAL) {
-			throw new IllegalStateException("Partials don't embed raw data");
+	public Instruction indent(String indentation) {
+		if ( "".equals(indentation) ) {
+			return this;
 		}
-		return data.trim();
+		if ( indentation == null || !Indentation.isIndentation(indentation) ) {
+			throw new IllegalArgumentException("Invalid indentation : " + indentation);
+		}
+		Instruction instruction = new Instruction(action, data);
+		instruction.indentation = indentation;
+		return instruction;
 	}
+	
+	private transient String string;
 	
 	/**
-	 * @return the {@code Instruction} {@link Action} name
+	 * @return the {@code Instruction} as a {@link String}
 	 */
 	@Override
 	public String toString() {
-		return "Instruction " + action;
+		if (string == null) {
+			String data = StringEscapeUtils.escapeJava(this.data);
+			string = MessageFormat.format("{0}[{1}:{2}]", getClass().getSimpleName(), action, data);
+		}
+		return string;
 	}
 
 	private Object writeReplace() {

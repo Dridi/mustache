@@ -15,7 +15,11 @@ public class Partial implements Processable {
 		this.indentation = indentation;
 	}
 
-	public static Partial newInstance(String name, String indentation) {
+	public static Processable newInstance(String name) {
+		return newIndentedInstance(name, "");
+	}
+
+	public static Partial newIndentedInstance(String name, String indentation) {
 		if (name == null | indentation == null) {
 			throw new NullPointerException();
 		}
@@ -55,7 +59,7 @@ public class Partial implements Processable {
 		}
 		
 		private Object readResolve() {
-			return Partial.newInstance(name, indentation);
+			return Partial.newIndentedInstance(name, indentation);
 		}
 	}
 }
