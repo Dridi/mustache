@@ -62,7 +62,7 @@ public final class Sequencer {
 			throw new SequenceException("No section currently open, cannot close " + section);
 		}
 		
-		String current = sections.peekFirst();
+		String current = sections.peek();
 		
 		if ( current.equals(section) ) {
 			sections.pop();
