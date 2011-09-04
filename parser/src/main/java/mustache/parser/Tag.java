@@ -53,7 +53,11 @@ final class Tag {
 	}
 
 	boolean canBeStandalone() {
-		return type != Type.VARIABLE & type != Type.UNESCAPED_VARIABLE & type != Type.PARTIAL;
+		return type != Type.VARIABLE & type != Type.UNESCAPED_VARIABLE;
+	}
+
+	boolean isPartial() {
+		return type == Type.PARTIAL;
 	}
 	
 	Instruction toInstruction() {

@@ -37,7 +37,6 @@ final class Delimiter {
 	}
 
 	Instruction getInstruction() throws ParseException {
-		textTrailingBlanks = calculateTextTrailingBlanks(actualTag);
 		
 		Instruction instruction = actualTag.toInstruction();
 		if (instruction == null) {
@@ -45,19 +44,28 @@ final class Delimiter {
 		}
 		
 		if (instruction.getAction() != Instruction.Action.ENTER_PARTIAL) {
+			calculateTextTrailingBlanks(actualTag);
 			return instruction;
 		}
 		
-		return Instruction.newInstance(Instruction.Action.ENTER_PARTIAL, getTextTrailingBlanks() + instruction.getPartial());
+		return createEnterPartialInstruction( instruction.getPartial() );
 	}
 
-	private String calculateTextTrailingBlanks(Tag tag) {
+	private Instruction createEnterPartialInstruction(String name) {
+		boolean startBlank = tagLineStart.trim().length() == 0;
+		String indentation = startBlank ? tagLineStart : "";
+		textTrailingBlanks = "";
+		return Instruction.newInstance(Instruction.Action.ENTER_PARTIAL, indentation + name);
+	}
+
+	private void calculateTextTrailingBlanks(Tag tag) {
 		boolean startBlank = tagLineStart.trim().length() == 0;
 		if ( !tag.canBeStandalone() ) {
-			return startBlank ? tagLineStart : "";
+			textTrailingBlanks = startBlank ? tagLineStart : "";
+			return;
 		}
 		boolean endBlank = tagLineEnd.trim().length() == 0;
-		return startBlank & endBlank ? "" : tagLineStart;
+		textTrailingBlanks = startBlank & endBlank ? "" : tagLineStart;
 	}
 
 	String getTextTrailingBlanks() {
@@ -132,7 +140,9 @@ final class Delimiter {
 
 	private boolean isStandalone() {
 		if (actualTag.canBeStandalone() && tagLineStart.trim().length() == 0 && tagLineEnd.trim().length() == 0) {
-			tagLineStart = "";
+			if ( !actualTag.isPartial() ) {
+				tagLineStart = "";
+			}
 			tagLineEnd = "";
 			return true;
 		}
