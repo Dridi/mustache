@@ -39,7 +39,7 @@ final class Delimiter {
 
 	Instruction getProcessable() throws ParseException {
 		
-		Instruction processable = actualTag.toProcessable();
+		Instruction processable = actualTag.toInstruction();
 		if (processable == null) {
 			return null;
 		}

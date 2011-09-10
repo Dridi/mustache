@@ -135,7 +135,8 @@ public class Parser {
 		// appends the blanks ommited in updateCurrentText() if needed
 		currentText.append( delimiter.getTextTrailingBlanks() );
 		if (currentText.length() > 0) {
-			sequencer.add(AppendText.Action.APPEND_TEXT, currentText.toString());
+			AppendText instruction = new AppendText( currentText.toString() );
+			sequencer.add(instruction);
 		}
 		currentText = new StringBuilder();
 	}

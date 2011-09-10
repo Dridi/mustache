@@ -3,14 +3,15 @@ package mustache.parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import mustache.core.AppendText;
+import mustache.core.AppendVariable;
+import mustache.core.CloseSection;
 import mustache.core.EnterPartial;
 import mustache.core.Instruction;
+import mustache.core.OpenSection;
 import mustache.util.Context;
 
 final class Tag {
-	
-	private static final String TAG_CONTENT_REGEX = "^(&|#|\\^|/|\\>|\\=|\\!)?\\s*(.*?)$";
+	private static final String TAG_CONTENT_REGEX = "^(&|#|\\^|/|\\>|\\=|\\!)?\\s*(.*?)$"; // TODO check non greedy pattern
 	private static final Pattern TAG_CONTENT_PATTERN = Pattern.compile(TAG_CONTENT_REGEX, Pattern.DOTALL);
 	
 	private final Type type;
@@ -26,8 +27,8 @@ final class Tag {
 		Type type = Type.fromToken( matcher.group(1) );
 		String content = matcher.group(2);
 		
-		if ( type != Type.PARTIAL && type.action != null && !Context.isValidQuery(content) ) {
-			throw new ParseException("Invalid tag content : " + content);
+		if ( hasInterpolation(type) ) {
+			checkInterpolation(content);
 		}
 		
 		Tag tag = new Tag(type, content);
@@ -41,12 +42,18 @@ final class Tag {
 	
 	static Tag newUnescapedTag(String string) throws ParseException {
 		String content = string.trim();
-		
+		checkInterpolation(content);
+		return new Tag(Type.UNESCAPED_VARIABLE, content);
+	}
+
+	private static boolean hasInterpolation(Type type) {
+		return type != Type.PARTIAL & type != Type.DELIMITER & type != Type.COMMENT;
+	}
+
+	private static void checkInterpolation(String content) throws ParseException {
 		if ( !Context.isValidQuery(content) ) {
 			throw new ParseException("Invalid tag content : " + content);
 		}
-		
-		return new Tag(Type.UNESCAPED_VARIABLE, content);
 	}
 	
 	private Tag(Type type, String content) {
@@ -62,33 +69,67 @@ final class Tag {
 		return type == Type.PARTIAL;
 	}
 	
-	Instruction toProcessable() {
-		if (type == Type.PARTIAL) {
-			return EnterPartial.newInstance(content);
-		}
-		if (type.action == null) {
-			return null;
-		}
-		return AppendText.newInstance(type.action, content);
+	Instruction toInstruction() {
+		return type.toInstruction(content);
 	}
 	
 	private enum Type {
-		VARIABLE("", AppendText.Action.APPEND_VARIABLE),
-		UNESCAPED_VARIABLE("&", AppendText.Action.APPEND_UNESCAPED_VARIABLE),
-		SECTION("#", AppendText.Action.OPEN_SECTION),
-		INVERTED_SECTION("^", AppendText.Action.OPEN_INVERTED_SECTION),
-		SECTION_END("/", AppendText.Action.CLOSE_SECTION),
-		PARTIAL(">", null),
-		DELIMITER("=", null),
-		COMMENT("!", null);
+		VARIABLE("") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return AppendVariable.newInstance(content, false);
+			}
+		},
+		UNESCAPED_VARIABLE("&") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return AppendVariable.newInstance(content, true);
+			}
+		},
+		SECTION("#") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return OpenSection.newInstance(content, false);
+			}
+		},
+		INVERTED_SECTION("^") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return OpenSection.newInstance(content, true);
+			}
+		},
+		SECTION_END("/") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return CloseSection.newInstance(content);
+			}
+		},
+		PARTIAL(">") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return EnterPartial.newInstance(content);
+			}
+		},
+		DELIMITER("=") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return null;
+			}
+		},
+		COMMENT("!") {
+			@Override
+			protected Instruction toInstruction(String content) {
+				return null;
+			}
+		};
 		
 		private final String token;
-		private final AppendText.Action action;
 		
-		private Type(String token, AppendText.Action action) {
+		private Type(String token) {
 			this.token = token;
-			this.action = action;
 		}
+		
+		protected abstract Instruction toInstruction(String content);
 		
 		private static Type fromToken(String token) {
 			for (Type type : values()) {
