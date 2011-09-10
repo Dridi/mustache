@@ -25,7 +25,7 @@ public class LineIterator {
 		if (readable == null) {
 			throw new NullPointerException();
 		}
-		if (readable instanceof Reader) {
+		if ( Reader.class.isInstance(readable) ) {
 			return new LineReader((Reader) readable);
 		}
 		return new LineIterator(readable);
