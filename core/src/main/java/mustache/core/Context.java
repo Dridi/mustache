@@ -120,7 +120,7 @@ public class Context {
 		return Interpolation.hasBaseVariable(query, data);
 	}
 	
-	private static final Class<?>[] BASIC_CLASSES = {String.class, Number.class, Boolean.class};
+	private static final Class<?>[] BASIC_CLASSES = {String.class, Boolean.class, Number.class, Character.class};
 	
 	private static boolean isBasic(Object data) {
 		if (data == null) {

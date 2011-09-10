@@ -1,8 +1,8 @@
 package mustache;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
-import mustache.core.Indentation;
 import mustache.core.Instruction;
 import mustache.core.Processor;
 import mustache.core.SectionStack;
@@ -10,6 +10,7 @@ import mustache.core.SectionStack;
 import org.apache.commons.lang.StringEscapeUtils;
 
 public class Renderer {
+	private static final Pattern INDENT_PARTIAL_TEXT = Pattern.compile("\\r\\n|\\r|\\n(?!$)");
 
 	public static void render(Processor processor, Object data, Appendable appendable) throws IOException {
 		if (processor == null | appendable == null) {
@@ -62,24 +63,29 @@ public class Renderer {
 	}
 
 	private void appendText(String text, Instruction instruction) throws IOException {
-		String string = Indentation.indentPartialText(text, instruction.getIndentation());
+		String string = text;
+		if ( instruction.isIndented() ) {
+			string = INDENT_PARTIAL_TEXT.matcher(string).replaceAll("$0" + instruction.getIndentation());
+		}
 		appendable.append(string);
 	}
 
 	private void appendVariable(Instruction instruction) throws IOException {
 		String value = sectionStack.getValue( instruction.getData() );
-		if (endOfLine) {
-			appendable.append( instruction.getIndentation() );
-		}
+		appendVariableIndentation(instruction);
 		appendable.append( StringEscapeUtils.escapeHtml(value) );
 	}
 
 	private void appendUnescapedVariable(Instruction instruction) throws IOException {
 		String value = sectionStack.getValue( instruction.getData() );
-		if (endOfLine) {
+		appendVariableIndentation(instruction);
+		appendable.append(value);
+	}
+
+	private void appendVariableIndentation(Instruction instruction) throws IOException {
+		if ( endOfLine & instruction.isIndented() ) {
 			appendable.append( instruction.getIndentation() );
 		}
-		appendable.append(value);
 	}
 
 	private void openSection(String interpolation) {

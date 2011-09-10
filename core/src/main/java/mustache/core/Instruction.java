@@ -14,8 +14,7 @@ import org.apache.commons.lang.StringEscapeUtils;
  * 
  * @author Dri
  */
-public final class Instruction implements Processable {
-	
+public final class Instruction extends Processable {
 	private static final long serialVersionUID = 7976280972290440553L;
 	
 	/**
@@ -33,7 +32,7 @@ public final class Instruction implements Processable {
 	private final Action action;
 	private final String data;
 	
-	private transient String indentation = "";
+	private transient String indentation = null;
 
 	private Instruction(Action action, String data) {
 		this.action = action;
@@ -87,6 +86,11 @@ public final class Instruction implements Processable {
 		return data;
 	}
 	
+	public boolean isIndented() {
+		return indentation != null;
+	}
+	
+	@Override
 	public String getIndentation() {
 		return indentation;
 	}
@@ -98,11 +102,15 @@ public final class Instruction implements Processable {
 		return data.endsWith("\r") | data.endsWith("\n");
 	}
 	
+	private boolean notIndentable() {
+		return action != Action.APPEND_TEXT & action != Action.APPEND_VARIABLE & action != Action.APPEND_UNESCAPED_VARIABLE;
+	}
+	
 	public Instruction indent(String indentation) {
-		if ( "".equals(indentation) ) {
+		if ( notIndentable() | "".equals(indentation) ) {
 			return this;
 		}
-		if ( indentation == null || !Indentation.isIndentation(indentation) ) {
+		if ( indentation == null || !isIndentation(indentation) ) {
 			throw new IllegalArgumentException("Invalid indentation : " + indentation);
 		}
 		Instruction instruction = new Instruction(action, data);

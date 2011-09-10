@@ -4,7 +4,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
-public class Partial implements Processable {
+public final class Partial extends Processable {
 	private static final long serialVersionUID = 4694509995100968343L;
 	
 	private final String name;
@@ -26,7 +26,7 @@ public class Partial implements Processable {
 		if (name.trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid name : " + name);
 		}
-		if ( !Indentation.isIndentation(indentation) ) {
+		if ( !isIndentation(indentation) ) {
 			throw new IllegalArgumentException("Invalid indentation : " + indentation);
 		}
 		return new Partial(name, indentation);
@@ -36,6 +36,7 @@ public class Partial implements Processable {
 		return name;
 	}
 	
+	@Override
 	public String getIndentation() {
 		return indentation;
 	}
