@@ -3,10 +3,10 @@ package mustache.parser;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import mustache.core.Context;
+import mustache.core.AppendText;
+import mustache.core.EnterPartial;
 import mustache.core.Instruction;
-import mustache.core.Partial;
-import mustache.core.Processable;
+import mustache.util.Context;
 
 final class Tag {
 	
@@ -62,30 +62,30 @@ final class Tag {
 		return type == Type.PARTIAL;
 	}
 	
-	Processable toProcessable() {
+	Instruction toProcessable() {
 		if (type == Type.PARTIAL) {
-			return Partial.newInstance(content);
+			return EnterPartial.newInstance(content);
 		}
 		if (type.action == null) {
 			return null;
 		}
-		return Instruction.newInstance(type.action, content);
+		return AppendText.newInstance(type.action, content);
 	}
 	
 	private enum Type {
-		VARIABLE("", Instruction.Action.APPEND_VARIABLE),
-		UNESCAPED_VARIABLE("&", Instruction.Action.APPEND_UNESCAPED_VARIABLE),
-		SECTION("#", Instruction.Action.OPEN_SECTION),
-		INVERTED_SECTION("^", Instruction.Action.OPEN_INVERTED_SECTION),
-		SECTION_END("/", Instruction.Action.CLOSE_SECTION),
+		VARIABLE("", AppendText.Action.APPEND_VARIABLE),
+		UNESCAPED_VARIABLE("&", AppendText.Action.APPEND_UNESCAPED_VARIABLE),
+		SECTION("#", AppendText.Action.OPEN_SECTION),
+		INVERTED_SECTION("^", AppendText.Action.OPEN_INVERTED_SECTION),
+		SECTION_END("/", AppendText.Action.CLOSE_SECTION),
 		PARTIAL(">", null),
 		DELIMITER("=", null),
 		COMMENT("!", null);
 		
 		private final String token;
-		private final Instruction.Action action;
+		private final AppendText.Action action;
 		
-		private Type(String token, Instruction.Action action) {
+		private Type(String token, AppendText.Action action) {
 			this.token = token;
 			this.action = action;
 		}

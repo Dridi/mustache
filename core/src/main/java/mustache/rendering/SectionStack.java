@@ -1,4 +1,4 @@
-package mustache.core;
+package mustache.rendering;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

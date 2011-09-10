@@ -1,4 +1,4 @@
-package mustache.core;
+package mustache.rendering;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import mustache.util.Context;
 
 class Section {
 	

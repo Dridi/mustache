@@ -1,4 +1,4 @@
-package mustache.core;
+package mustache.util;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -64,7 +64,7 @@ public final class Interpolation {
 	 * @return {@code true} if the query is valid
 	 */
 	public static boolean isValidQuery(String query) {
-		return QUERY_PATTERN.matcher(query).matches();
+		return query != null ? QUERY_PATTERN.matcher(query).matches() : false;
 	}
 	
 	/**

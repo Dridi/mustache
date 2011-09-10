@@ -1,4 +1,4 @@
-package mustache.core;
+package mustache.util;
 
 import java.util.ArrayList;
 import java.util.List;

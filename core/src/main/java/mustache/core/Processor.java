@@ -10,10 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+
 /**
- * The {@code Processor} class iterates through a sequence of {@link Processable}s
+ * The {@code Processor} class iterates through a sequence of {@link Instruction}s
  * and needs to be notified to enter or exit sections. {@code Processor}s can be
- * serialized and reused at will but their {@link Processable}s sequence can not
+ * serialized and reused at will but their {@link Instruction}s sequence can not
  * be modified.
  * 
  * <p>This class is not meant for concurrent manipulation by several threads.</p>
@@ -25,7 +26,7 @@ import java.util.Map;
 public final class Processor implements Serializable, Iterator<Instruction> {
 	private static final long serialVersionUID = 289040399110456725L;
 
-	private final List<Processable> sequence;
+	private final List<Instruction> sequence;
 	private final Map<String, Processor> partials;
 	
 	private final transient int maxPosition;
@@ -35,18 +36,18 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	private transient Processor currentPartial;
 	private transient String indentation = "";
 	
-	private Processor(List<Processable> sequence) {
+	private Processor(List<Instruction> sequence) {
 		this.sequence = sequence;
 		this.maxPosition = sequence.size() - 1;
 		this.partials = new HashMap<String, Processor>();
 	}
 	
 	/**
-	 * Creates a {@code Processor} from a processable {@link Sequencer}.
+	 * Creates a {@code Processor} from a instruction {@link Sequencer}.
 	 * @param sequencer the {@link Sequencer}
 	 * @return a newly created {@code Processor}
 	 * @throws NullPointerException if {@code sequencer} is {@code null}
-	 * @throws IllegalArgumentException if {@code sequencer} is not processable
+	 * @throws IllegalArgumentException if {@code sequencer} is not instruction
 	 * @see Sequencer#isProcessable()
 	 */
 	public static Processor fromSequencer(Sequencer sequencer) {
@@ -60,7 +61,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		}
 		synchronized (sequencer) {
 			if ( !sequencer.isProcessable() ) {
-				throw new IllegalArgumentException("Sequence not processable");
+				throw new IllegalArgumentException("Sequence not instruction");
 			}
 			// TODO match partials map against sequencer partials list
 			Processor processor = new Processor(sequencer.getSequence());
@@ -81,8 +82,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	/**
 	 * Notifies the {@code Processor} to enter the section.
-	 * @throws IllegalStateException if the current {@link Instruction} is not opening
-	 * @see Instruction#opening()
+	 * @throws IllegalStateException if the current {@link AppendText} is not opening
+	 * @see AppendText#opening()
 	 */
 	public void enterSection() {
 		if (currentPartial != null) {
@@ -97,8 +98,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 
 	/**
 	 * Notifies the {@code Processor} to exit the section.
-	 * @throws IllegalStateException if the current {@link Instruction} is not closing
-	 * @see Instruction#closing()
+	 * @throws IllegalStateException if the current {@link AppendText} is not closing
+	 * @see AppendText#closing()
 	 */
 	public void exitSection() {
 		if (currentPartial != null) {
@@ -150,18 +151,21 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private Instruction nextInstruction() {
-		Processable processable = sequence.get(currentPosition);
-		if (processable instanceof Partial) {
-			initSafePartial((Partial) processable);
-			return Instruction.newInstance(Instruction.Action.APPEND_TEXT, processable.getIndentation());
+		Instruction instruction = sequence.get(currentPosition);
+		if (instruction instanceof EnterPartial) {
+			EnterPartial enterPartial = (EnterPartial) instruction;
+			initSafePartial(enterPartial);
+			return new AppendText( enterPartial.getIndentation() );
 		}
-		Instruction instruction = (Instruction) processable;
-		tryOpeningSection = instruction.opening();
-		tryClosingSection = instruction.closing();
-		return instruction.indent(indentation);
+		if (instruction instanceof AppendText) {
+			return ((AppendText) instruction).indent(indentation);
+		}
+		tryOpeningSection = instruction instanceof OpenSection;
+		tryClosingSection = instruction instanceof CloseSection;
+		return instruction;
 	}
 
-	public void initSafePartial(Partial partial) {
+	private void initSafePartial(EnterPartial partial) {
 		Processor processor = partials.get( partial.getName() );
 		if (processor == null) {
 		    processor = this; // FIXME better management of recursive partials
@@ -198,12 +202,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	}
 
 	private int openCloseDelta() {
-		Processable processable = sequence.get(currentPosition);
-		if (processable instanceof Partial) {
-			return 0;
-		}
-		Instruction instruction = (Instruction) processable;
-		return instruction.opening() ? 1 : instruction.closing() ? -1 : 0;
+		Instruction instruction = sequence.get(currentPosition);
+		return instruction instanceof OpenSection ? 1 : instruction instanceof CloseSection ? -1 : 0;
 	}
 	
 	/**
@@ -226,7 +226,7 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	private static class SerializationProxy implements Serializable {
 		private static final long serialVersionUID = 7682273649183979614L;
 		
-		private final List<Processable> sequence;
+		private final List<Instruction> sequence;
 		private final Map<String, Processor> partials;
 
 		SerializationProxy(Processor processor) {

@@ -3,9 +3,9 @@ package mustache;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import mustache.core.Instruction;
+import mustache.core.AppendText;
 import mustache.core.Processor;
-import mustache.core.SectionStack;
+import mustache.rendering.SectionStack;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -35,7 +35,7 @@ public class Renderer {
 		processor.reset();
 		
 		while ( processor.hasNext() ) {
-			Instruction instruction = processor.next();
+			AppendText instruction = processor.next();
 			
 			switch ( instruction.getAction() ) {
 			case APPEND_TEXT:
@@ -62,7 +62,7 @@ public class Renderer {
 		}
 	}
 
-	private void appendText(String text, Instruction instruction) throws IOException {
+	private void appendText(String text, AppendText instruction) throws IOException {
 		String string = text;
 		if ( instruction.isIndented() ) {
 			string = INDENT_PARTIAL_TEXT.matcher(string).replaceAll("$0" + instruction.getIndentation());
@@ -70,19 +70,19 @@ public class Renderer {
 		appendable.append(string);
 	}
 
-	private void appendVariable(Instruction instruction) throws IOException {
+	private void appendVariable(AppendText instruction) throws IOException {
 		String value = sectionStack.getValue( instruction.getData() );
 		appendVariableIndentation(instruction);
 		appendable.append( StringEscapeUtils.escapeHtml(value) );
 	}
 
-	private void appendUnescapedVariable(Instruction instruction) throws IOException {
+	private void appendUnescapedVariable(AppendText instruction) throws IOException {
 		String value = sectionStack.getValue( instruction.getData() );
 		appendVariableIndentation(instruction);
 		appendable.append(value);
 	}
 
-	private void appendVariableIndentation(Instruction instruction) throws IOException {
+	private void appendVariableIndentation(AppendText instruction) throws IOException {
 		if ( endOfLine & instruction.isIndented() ) {
 			appendable.append( instruction.getIndentation() );
 		}

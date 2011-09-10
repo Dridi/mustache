@@ -3,23 +3,24 @@ package mustache.core;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
 
-public final class Partial extends Processable {
+public final class EnterPartial extends Instruction {
 	private static final long serialVersionUID = 4694509995100968343L;
 	
 	private final String name;
 	private final String indentation;
 	
-	private Partial(String name, String indentation) {
+	private EnterPartial(String name, String indentation) {
 		this.name = name;
 		this.indentation = indentation;
 	}
 
-	public static Processable newInstance(String name) {
+	public static Instruction newInstance(String name) {
 		return newIndentedInstance(name, "");
 	}
 
-	public static Partial newIndentedInstance(String name, String indentation) {
+	public static EnterPartial newIndentedInstance(String name, String indentation) {
 		if (name == null | indentation == null) {
 			throw new NullPointerException();
 		}
@@ -29,17 +30,25 @@ public final class Partial extends Processable {
 		if ( !isIndentation(indentation) ) {
 			throw new IllegalArgumentException("Invalid indentation : " + indentation);
 		}
-		return new Partial(name, indentation);
+		return new EnterPartial(name, indentation);
 	}
 
 	public String getName() {
 		return name;
 	}
 	
-	@Override
 	public String getIndentation() {
 		return indentation;
 	}
+	
+	/**
+	 * @return the {@code Instruction} as a {@link String}
+	 */
+	@Override
+	public String toString() {
+		return MessageFormat.format("{0}[{1}, indentation:{2}]", getClass().getSimpleName(), name, indentation);
+	}
+	
 	private Object writeReplace() {
 		return new SerializationProxy(this);
 	}
@@ -49,18 +58,18 @@ public final class Partial extends Processable {
 	}
 
 	private static class SerializationProxy implements Serializable {
-		private static final long serialVersionUID = 1605348054856340659L;
+		private static final long serialVersionUID = 1616022726830459017L;
 		
 		private final String name;
 		private final String indentation;
 		
-		SerializationProxy(Partial processor) {
-			this.name = processor.name;
-			this.indentation = processor.indentation;
+		SerializationProxy(EnterPartial instruction) {
+			this.name = instruction.name;
+			this.indentation = instruction.indentation;
 		}
 		
 		private Object readResolve() {
-			return Partial.newIndentedInstance(name, indentation);
+			return EnterPartial.newIndentedInstance(name, indentation);
 		}
 	}
 }

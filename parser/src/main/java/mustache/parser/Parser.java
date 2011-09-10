@@ -8,9 +8,9 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import mustache.core.AppendText;
+import mustache.core.EnterPartial;
 import mustache.core.Instruction;
-import mustache.core.Partial;
-import mustache.core.Processable;
 import mustache.core.Processor;
 import mustache.core.SequenceException;
 import mustache.core.Sequencer;
@@ -106,17 +106,17 @@ public class Parser {
 	}
 
 	private void addProcessable() throws ParseException, SequenceException, IOException {
-		Processable processable = delimiter.getProcessable();
+		Instruction processable = delimiter.getProcessable();
 		appendCurrentText();
 		if (processable != null) {
 			sequencer.add(processable);
 		}
-		if (processable instanceof Partial) {
-			loadPartial((Partial) processable);
+		if (processable instanceof EnterPartial) {
+			loadPartial((EnterPartial) processable);
 		}
 	}
 
-	public void loadPartial(Partial partial) throws ParseException, IOException {
+	public void loadPartial(EnterPartial partial) throws ParseException, IOException {
 		String name = partial.getName();
 		if (partialLoader == null) {
 			throw new IllegalStateException("Templates expects to load a partial : " + partial);
@@ -135,7 +135,7 @@ public class Parser {
 		// appends the blanks ommited in updateCurrentText() if needed
 		currentText.append( delimiter.getTextTrailingBlanks() );
 		if (currentText.length() > 0) {
-			sequencer.add(Instruction.Action.APPEND_TEXT, currentText.toString());
+			sequencer.add(AppendText.Action.APPEND_TEXT, currentText.toString());
 		}
 		currentText = new StringBuilder();
 	}
