@@ -43,9 +43,10 @@ public final class Sequencer {
 			pushSection((OpenSection) instruction);
 		}
 		if (instruction instanceof CloseSection) {
-			popSection((CloseSection) instruction);
+			sequence.add(popSection((CloseSection) instruction));
+		} else {
+			sequence.add(instruction);
 		}
-		sequence.add(instruction);
 		return this;
 	}
 	

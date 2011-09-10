@@ -31,8 +31,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	
 	private final transient int maxPosition;
 	private transient int currentPosition = -1;
-	private transient boolean tryOpeningSection;
-	private transient boolean tryClosingSection;
+	private transient OpenSection tryOpeningSection;
+	private transient CloseSection tryClosingSection;
 	private transient Processor currentPartial;
 	private transient String indentation = "";
 	
@@ -75,8 +75,8 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 */
 	public void reset() {
 		currentPosition = -1;
-		tryOpeningSection = false;
-		tryClosingSection = false;
+		tryOpeningSection = null;
+		tryClosingSection = null;
 		currentPartial = null;
 	}
 	
@@ -90,10 +90,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			currentPartial.enterSection();
 			return;
 		}
-		if (tryOpeningSection == false) {
+		if (tryOpeningSection == null) {
 			throw new IllegalStateException("Unexpected attempt to enter a section.");
 		}
-		tryOpeningSection = false;
+		tryOpeningSection = null;
 	}
 
 	/**
@@ -106,10 +106,10 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			currentPartial.exitSection();
 			return;
 		}
-		if (tryClosingSection == false) {
+		if (tryClosingSection == null) {
 			throw new IllegalStateException("Unexpected attempt to exit a section.");
 		}
-		tryClosingSection = false;
+		tryClosingSection = null;
 	}
 	
 	/**
@@ -139,11 +139,15 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 			currentPartial = null;
 		}
 		
-		if (tryOpeningSection) {
-			skipSection();
+		if (tryOpeningSection != null) {
+			// skip section
+			currentPosition = tryOpeningSection.getCloseIndex();
+			tryOpeningSection = null;
 		}
-		else if (tryClosingSection) {
-			reenterSection();
+		else if (tryClosingSection != null) {
+			// re-enter section
+			currentPosition = tryClosingSection.getOpenIndex();
+			tryClosingSection = null;
 		}
 		
 		currentPosition++;
@@ -160,8 +164,12 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		if (instruction instanceof AppendText) {
 			return ((AppendText) instruction).indent(indentation);
 		}
-		tryOpeningSection = instruction instanceof OpenSection;
-		tryClosingSection = instruction instanceof CloseSection;
+		if (instruction instanceof OpenSection) {
+			tryOpeningSection = (OpenSection) instruction;
+		}
+		if (instruction instanceof CloseSection) {
+			tryClosingSection = (CloseSection) instruction;
+		}
 		return instruction;
 	}
 
@@ -173,37 +181,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 		currentPartial = new Processor(processor.sequence);
 		currentPartial.partials.putAll(processor.partials);
 		currentPartial.indentation = indentation + partial.getIndentation();
-	}
-
-	private void reenterSection() {
-		int openedSections = -1;
-		
-		while (openedSections < 0) {
-			currentPosition--;
-			openedSections += openCloseDelta();
-		}
-		
-		tryClosingSection = false;
-	}
-
-	private void skipSection() {
-		int openedSections = 1;
-		
-		while (openedSections > 0) {
-			currentPosition++;
-			openedSections += openCloseDelta();
-		}
-		
-		if (currentPosition > maxPosition) {
-			currentPosition = maxPosition;
-		}
-		
-		tryOpeningSection = false;
-	}
-
-	private int openCloseDelta() {
-		Instruction instruction = sequence.get(currentPosition);
-		return instruction instanceof OpenSection ? 1 : instruction instanceof CloseSection ? -1 : 0;
 	}
 	
 	/**
