@@ -15,7 +15,7 @@ public final class CloseSection extends Instruction {
 	
 	private transient int openIndex = -1;
 	
-	private CloseSection(String name) {
+	public CloseSection(String name) {
 		this.name = name;
 	}
 	

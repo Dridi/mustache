@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import mustache.core.AppendText;
+import mustache.core.AppendVariable;
+import mustache.core.CloseSection;
+import mustache.core.Instruction;
+import mustache.core.OpenSection;
 import mustache.core.Processor;
 import mustache.rendering.SectionStack;
 
@@ -23,7 +27,7 @@ public class Renderer {
 	private final SectionStack sectionStack;
 	private final Appendable appendable;
 	
-	private boolean endOfLine;
+	private String previousIndentation;
 	
 	private Renderer(Processor processor, Object data, Appendable appendable) {
 		this.processor = processor;
@@ -35,73 +39,55 @@ public class Renderer {
 		processor.reset();
 		
 		while ( processor.hasNext() ) {
-			AppendText instruction = processor.next();
+			Instruction instruction = processor.next();
 			
-			switch ( instruction.getAction() ) {
-			case APPEND_TEXT:
-				appendText(instruction.getData(), instruction);
-				break;
-			case APPEND_VARIABLE:
-				appendVariable(instruction);
-				break;
-			case APPEND_UNESCAPED_VARIABLE:
-				appendUnescapedVariable(instruction);
-				break;
-			case OPEN_SECTION:
-				openSection( instruction.getData() );
-				break;
-			case OPEN_INVERTED_SECTION:
-				openInvertedSection( instruction.getData() );
-				break;
-			case CLOSE_SECTION:
-				closeSection( instruction.getData() );
-				break;
+			if ( AppendText.class.isInstance(instruction) ) {
+				appendText((AppendText) instruction);
+			} else if ( AppendVariable.class.isInstance(instruction) ) {
+				appendVariable((AppendVariable) instruction);
+			} else if ( OpenSection.class.isInstance(instruction) ) {
+				openSection((OpenSection) instruction);
+			} else if ( CloseSection.class.isInstance(instruction) ) {
+				closeSection((CloseSection) instruction);
 			}
 			
-			endOfLine = instruction.isEndOfLine();
+			saveIndentation(instruction);
 		}
 	}
 
-	private void appendText(String text, AppendText instruction) throws IOException {
-		String string = text;
+	public void saveIndentation(Instruction instruction) {
+		if ( AppendText.class.isInstance(instruction) ) {
+			AppendText appendText = (AppendText) instruction;
+			previousIndentation = appendText.isEndOfLine() ? appendText.getIndentation() : "";
+		} else {
+			previousIndentation = "";
+		}
+	}
+
+	private void appendText(AppendText instruction) throws IOException {
+		String text = instruction.getText();
 		if ( instruction.isIndented() ) {
-			string = INDENT_PARTIAL_TEXT.matcher(string).replaceAll("$0" + instruction.getIndentation());
+			text = INDENT_PARTIAL_TEXT.matcher(text).replaceAll("$0" + instruction.getIndentation());
 		}
-		appendable.append(string);
+		appendable.append(text);
 	}
 
-	private void appendVariable(AppendText instruction) throws IOException {
-		String value = sectionStack.getValue( instruction.getData() );
-		appendVariableIndentation(instruction);
-		appendable.append( StringEscapeUtils.escapeHtml(value) );
-	}
-
-	private void appendUnescapedVariable(AppendText instruction) throws IOException {
-		String value = sectionStack.getValue( instruction.getData() );
-		appendVariableIndentation(instruction);
-		appendable.append(value);
-	}
-
-	private void appendVariableIndentation(AppendText instruction) throws IOException {
-		if ( endOfLine & instruction.isIndented() ) {
-			appendable.append( instruction.getIndentation() );
+	private void appendVariable(AppendVariable instruction) throws IOException {
+		String value = sectionStack.getValue( instruction.getName() );
+		if ( !instruction.isUnescaped() ) {
+			value = StringEscapeUtils.escapeHtml(value);
 		}
+		appendable.append(previousIndentation).append(value);
 	}
 
-	private void openSection(String interpolation) {
-		if ( sectionStack.openSection(interpolation) ) {
+	private void openSection(OpenSection instruction) {
+		if ( sectionStack.openSection(instruction) ) {
 			processor.enterSection();
 		}
 	}
 
-	private void openInvertedSection(String interpolation) {
-		if ( sectionStack.openInvertedSection(interpolation) ) {
-			processor.enterSection();
-		}
-	}
-
-	private void closeSection(String interpolation) {
-		if ( sectionStack.closeSection(interpolation) ) {
+	private void closeSection(CloseSection instruction) {
+		if ( sectionStack.closeSection(instruction) ) {
 			processor.exitSection();
 		}
 	}

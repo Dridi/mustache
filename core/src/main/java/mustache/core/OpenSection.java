@@ -16,7 +16,7 @@ public class OpenSection extends Instruction {
 	
 	private transient int closeIndex = -1;
 	
-	private OpenSection(String name, boolean inverted) {
+	public OpenSection(String name, boolean inverted) {
 		this.name = name;
 		this.inverted = inverted;
 	}

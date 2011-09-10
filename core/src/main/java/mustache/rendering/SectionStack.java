@@ -3,6 +3,9 @@ package mustache.rendering;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import mustache.core.CloseSection;
+import mustache.core.OpenSection;
+
 public class SectionStack {
 	
 	private final Deque<Section> sections;
@@ -42,20 +45,15 @@ public class SectionStack {
 		return newSection != null;
 	}
 
-	public boolean openSection(String query) {
-		return openSection(query, false);
+	public boolean openSection(OpenSection instruction) {
+		return openSection(instruction.getName(), instruction.isInverted());
 	}
 	
-	public boolean openInvertedSection(String query) {
-		return openSection(query, true);
-	}
-	
-	public boolean closeSection(String query) {
-		boolean close = sections.element().close(query);
+	public boolean closeSection(CloseSection instruction) {
+		boolean close = sections.element().close(instruction.getName());
 		if (close) {
 			sections.pop();
 		}
 		return close;
 	}
-	
 }
