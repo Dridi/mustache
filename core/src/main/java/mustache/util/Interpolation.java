@@ -1,6 +1,8 @@
 package mustache.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -21,9 +23,6 @@ import java.util.regex.Pattern;
  * </p>
  * 
  * <p>Valid interpolations are matched against {@value #QUERY_REGEX}.</p>
- * 
- * TODO interpolate methods (currently not implemented)
- * TODO interpolate in getters ? (only fields are currently supported)
  * 
  * @author Dri
  * @see Context
@@ -106,12 +105,22 @@ public final class Interpolation {
 			field.setAccessible(true);
 			return field.get(object);
 		}
-		catch (NoSuchFieldException e) {
-			return null;
+		catch (NoSuchFieldException e) {}
+		catch (IllegalAccessException e) {}
+		
+		try {
+			Method method = object.getClass().getDeclaredMethod(name);
+			if (method.getReturnType() == void.class) {
+				return null;
+			}
+			method.setAccessible(true);
+			return method.invoke(object);
 		}
-		catch (IllegalAccessException e) {
-			throw new IllegalStateException(e);
-		}
+		catch (IllegalAccessException e) {}
+		catch (InvocationTargetException e) {}
+		catch (NoSuchMethodException e) {}
+		
+		return null;
 	}
 	
 	/**
@@ -144,7 +153,13 @@ public final class Interpolation {
 			object.getClass().getDeclaredField(baseName);
 			return true;
 		}
-		catch (NoSuchFieldException e) {
+		catch (NoSuchFieldException e) {}
+		
+		try {
+			object.getClass().getDeclaredMethod(baseName);
+			return true;
+		}
+		catch (NoSuchMethodException e) {
 			return false;
 		}
 	}
