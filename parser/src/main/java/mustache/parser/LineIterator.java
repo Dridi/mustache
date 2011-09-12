@@ -6,6 +6,7 @@ import java.nio.CharBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
+// TODO move to util package
 public class LineIterator {
 	
 	private final Readable readable;
@@ -31,18 +32,29 @@ public class LineIterator {
 		return new LineIterator(readable);
 	}
 	
-	public boolean hasNext() {
-		return !finished || !lines.isEmpty();
+	public boolean hasNext() throws IOException {
+		if ( lines.isEmpty() ) {
+			read();
+		}
+		return !lines.isEmpty();
 	}
 	
 	public String next() throws IOException {
 		if ( !hasNext() ) {
 			throw new IllegalStateException();
 		}
-		while ( lines.isEmpty() ) {
+		read();
+		String next = lines.poll();
+		if ( lines.isEmpty() ) {
+			read();
+		}
+		return next;
+	}
+
+	private void read() throws IOException {
+		while ( !finished && lines.isEmpty() ) {
 			readLines();
 		}
-		return lines.poll();
 	}
 	
 	private void readLines() throws IOException {
@@ -50,7 +62,9 @@ public class LineIterator {
 		
 		if (size < 0) {
 			finished = true;
-			lines.add( currentLine.toString() );
+			if (currentLine.length() > 0) {
+				lines.add( currentLine.toString() );
+			}
 			return;
 		}
 		
