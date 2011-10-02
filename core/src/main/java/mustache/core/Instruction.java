@@ -12,9 +12,9 @@ public abstract class Instruction implements Serializable {
 	Instruction() {}
 	
 	public static boolean isIndentation(String indentation) {
-		for (int i = indentation.length(); --i > 0;) {
+		for (int i = indentation.length(); --i >= 0;) {
 			char c = indentation.charAt(i);
-			if (c != ' ' && c != '\t') {
+			if (c != ' ' & c != '\t') {
 				return false;
 			}
 		}
