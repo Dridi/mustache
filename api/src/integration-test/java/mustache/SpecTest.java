@@ -2,7 +2,6 @@ package mustache;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,12 +13,12 @@ import mustache.parser.ParseException;
 import mustache.parser.Parser;
 import mustache.parser.PartialLoader;
 
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
-import com.google.gson.Gson;
 
 @RunWith(Parameterized.class)
 public class SpecTest implements PartialLoader {
@@ -54,15 +53,15 @@ public class SpecTest implements PartialLoader {
 	}
 	
 	@Parameters
-	public static Collection<Object[]> loadTestCases() {
+	public static Collection<Object[]> loadTestCases() throws IOException {
 		List<Object[]> testCases = new ArrayList<Object[]>();
 		
-		Gson gson = SpecDataDeserializer.newGson();
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+		ObjectMapper mapper = new ObjectMapper().configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		
 		for (String path : TEST_SUITE_PATHS) {
 			InputStream specStream = classLoader.getResourceAsStream(path);
-			SpecTestSuite suite = gson.fromJson(new InputStreamReader(specStream), SpecTestSuite.class);
+			SpecTestSuite suite = mapper.readValue(specStream, SpecTestSuite.class);
 			
 			for ( SpecTestCase test : suite.getTests() ) {
 				testCases.add( new Object[] {test} );
@@ -71,5 +70,4 @@ public class SpecTest implements PartialLoader {
 		
 		return testCases;
 	}
-	
 }

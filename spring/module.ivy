@@ -5,7 +5,7 @@
 		<ea:build module="build-std-java" revision="0.2"/>
 	</info>
 	<dependencies>
-		<dependency org="mustache" name="mustache-core" rev="latest.revision" conf="default->default"/>
+		<dependency org="mustache" name="mustache-api" rev="latest.revision" conf="default->default"/>
 		<dependency org="org.springframework" name="spring-webmvc" rev="3.0.+" conf="default->default"/>
 		<dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="default->default"/>
 	</dependencies>

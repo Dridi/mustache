@@ -10,6 +10,6 @@
 		<dependency org="mustache" name="mustache-parser" rev="latest.revision" conf="default->default"/>
 		<dependency org="commons-lang" name="commons-lang" rev="2.6" conf="default->default"/>
 		<dependency org="junit" name="junit" rev="4.7" conf="test->default"/>
-		<dependency org="com.google.code.gson" name="gson" rev="1.7.1" conf="test->default"/>
+		<dependency org="org.codehaus.jackson" name="jackson-mapper-asl" rev="1.8.5" conf="test->default"/>
 	</dependencies>
 </ivy-module>
