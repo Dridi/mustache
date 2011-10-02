@@ -8,7 +8,7 @@ public class SpecTestCase {
 	
 	private String desc;
 	
-	private Map<String, Object> data;
+	private Object data;
 	
 	private Map<String, String> partials;
 	
@@ -32,11 +32,11 @@ public class SpecTestCase {
 		this.desc = desc;
 	}
 
-	public Map<String, Object> getData() {
+	public Object getData() {
 		return data;
 	}
 
-	public void setData(Map<String, Object> data) {
+	public void setData(Object data) {
 		this.data = data;
 	}
 
