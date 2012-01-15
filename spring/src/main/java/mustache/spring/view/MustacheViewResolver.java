@@ -10,7 +10,9 @@ import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 
 public class MustacheViewResolver extends AbstractTemplateViewResolver implements PartialLoader {
 	
-	private String encoding = "UTF-8";
+	public static final String DEFAULT_ENCODING = "UTF-8";
+	
+	private String encoding = DEFAULT_ENCODING;
 
 	@Override
 	protected MustacheView buildView(String viewName) throws Exception {
