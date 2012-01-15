@@ -13,10 +13,14 @@
 	<name>[${project.packaging}] ${project.artifactId}</name>
 	<description>A Java implementation of {{Mustache}} templates rendering.</description>
 	
+	<url>http://github.com/Dridi/mustache</url>
+	
 	<modules>
 		<module>core</module>
 		<module>spring</module>
 	</modules>
+	
+	<inceptionYear>2011</inceptionYear>
 	
 	<licenses>
 		<license>
@@ -25,6 +29,17 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+	
+	<scm>
+		<connection>scm:git:https://github.com/Dridi/mustache.git</connection>
+		<developerConnection>scm:git:https://github.com/Dridi/mustache.git</developerConnection>
+		<url>http://github.com/Dridi/mustache</url>
+	</scm>
+	
+	<issueManagement>
+		<system>GitHub</system>
+		<url>http://github.com/Dridi/mustache/issues</url>
+	</issueManagement>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
