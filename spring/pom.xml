@@ -14,6 +14,7 @@
 	<groupId>mustache</groupId>
 	<artifactId>mustache-spring</artifactId>
 	
+	<name>[${project.packaging}] ${project.artifactId}</name>
 	<description>Spring Web MVC Integration for {{Mustache}} templates rendering.</description>
 	
 	<dependencies>
