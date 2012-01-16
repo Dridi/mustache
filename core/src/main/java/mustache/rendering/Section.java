@@ -11,7 +11,7 @@ import java.util.Queue;
 
 import mustache.util.Context;
 
-class Section {
+final class Section {
 	
 	private final String name;
 	private final Queue<Context> contexts = new LinkedList<Context>();

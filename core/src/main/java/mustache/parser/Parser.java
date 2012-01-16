@@ -17,7 +17,7 @@ import mustache.core.Sequencer;
 
 import org.apache.commons.io.IOUtils;
 
-public class Parser {
+public final class Parser {
 	
 	public static Processor parseReadable(Readable readable, PartialLoader partialLoader) throws ParseException, IOException {
 		return new Parser(readable, partialLoader).parse();
@@ -116,7 +116,7 @@ public class Parser {
 		}
 	}
 
-	public void loadPartial(EnterPartial partial) throws ParseException, IOException {
+	private void loadPartial(EnterPartial partial) throws ParseException, IOException {
 		String name = partial.getName();
 		if (partialLoader == null) {
 			throw new IllegalStateException("Templates expects to load a partial : " + partial);

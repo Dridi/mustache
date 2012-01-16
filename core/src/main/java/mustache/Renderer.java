@@ -13,7 +13,7 @@ import mustache.rendering.SectionStack;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
-public class Renderer {
+public final class Renderer {
 	private static final Pattern INDENT_PARTIAL_TEXT = Pattern.compile("\\r\\n|\\r|\\n(?!$)");
 
 	public static void render(Processor processor, Object data, Appendable appendable) throws IOException {
@@ -55,7 +55,7 @@ public class Renderer {
 		}
 	}
 
-	public void saveIndentation(Instruction instruction) {
+	private void saveIndentation(Instruction instruction) {
 		if ( AppendText.class.isInstance(instruction) ) {
 			AppendText appendText = (AppendText) instruction;
 			previousIndentation = appendText.isEndOfLine() ? appendText.getIndentation() : "";
