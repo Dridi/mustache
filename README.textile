@@ -18,25 +18,25 @@ h2. Usage
 The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to render a template as shown in the "chris" unit test :
 <pre><code class="java">public class ChrisTest {
 
-	String template = "Hello {{name}}\nYou have just won ${{value}}!\n{{#in_ca}}\nWell, ${{taxed_value}}, after taxes.\n{{/in_ca}}\n";
-	String expected = "Hello Chris\nYou have just won $10000!\nWell, $6000.0, after taxes.\n";
-	
-	@Test
-	public void shouldRenderAsExcpected() throws ParseException, IOException {
-		
-		Mustache chrisExample = new Mustache() {
-			String name = "Chris";
-			int value = 10000;
-			float taxed_value() {
-				return value - (value * .4F);
-			}
-			boolean in_ca = true;
-		};
-		
-		StringBuilder result = new StringBuilder();
-		chrisExample.renderString(template, result, null);
-		
-		Assert.assertEquals(expected, result.toString());
-	}
-	
+  String template = "Hello {{name}}\nYou have just won ${{value}}!\n{{#in_ca}}\nWell, ${{taxed_value}}, after taxes.\n{{/in_ca}}\n";
+  String expected = "Hello Chris\nYou have just won $10000!\nWell, $6000.0, after taxes.\n";
+  
+  @Test
+  public void shouldRenderAsExcpected() throws ParseException, IOException {
+    
+    Mustache chrisExample = new Mustache() {
+      String name = "Chris";
+      int value = 10000;
+      float taxed_value() {
+        return value - (value * .4F);
+      }
+      boolean in_ca = true;
+    };
+    
+    StringBuilder result = new StringBuilder();
+    chrisExample.renderString(template, result, null);
+    
+    Assert.assertEquals(expected, result.toString());
+  }
+  
 }</code></pre>
