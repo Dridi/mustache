@@ -16,7 +16,7 @@ On top of it, it has a nice integration to Spring Web MVC and shows fairly good 
 h2. Usage
 
 The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to render a template as shown in the "chris" unit test :
-<code class="java"><pre>public class ChrisTest {
+<pre><code class="java">public class ChrisTest {
 
 	String template = "Hello {{name}}\nYou have just won ${{value}}!\n{{#in_ca}}\nWell, ${{taxed_value}}, after taxes.\n{{/in_ca}}\n";
 	String expected = "Hello Chris\nYou have just won $10000!\nWell, $6000.0, after taxes.\n";
@@ -39,4 +39,4 @@ The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to 
 		Assert.assertEquals(expected, result.toString());
 	}
 	
-}</pre></code>
+}</code></pre>
