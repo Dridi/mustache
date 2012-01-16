@@ -31,7 +31,6 @@ public class MustacheViewResolver extends AbstractTemplateViewResolver implement
 		return this;
 	}
 
-	@Override
 	public Readable loadPartial(String name) throws IOException {
 		String url = getPrefix() + name + getSuffix();
 		Resource resource = getApplicationContext().getResource(url);

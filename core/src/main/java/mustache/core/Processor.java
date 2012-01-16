@@ -115,7 +115,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	/**
 	 * Indicates whether there is still {@code Instruction}s to process.
 	 */
-	@Override
 	public boolean hasNext() {
 		return currentPosition < maxPosition || (currentPartial != null && currentPartial.hasNext());
 	}
@@ -126,7 +125,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 * @see #enterSection()
 	 * @see #exitSection()
 	 */
-	@Override
 	public Instruction next() {
 		if ( !hasNext() ) {
 			throw new IllegalStateException();
@@ -187,7 +185,6 @@ public final class Processor implements Serializable, Iterator<Instruction> {
 	 * Cannot remove {@code Processable}s from the sequence.
 	 * @throws UnsupportedOperationException
 	 */
-	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}

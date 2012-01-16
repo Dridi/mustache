@@ -46,7 +46,6 @@ public class SpecTest implements PartialLoader {
 		Assert.assertEquals(testCase.toString(), testCase.getExpected(), result.toString());
 	}
 	
-	@Override
 	public Readable loadPartial(String name) throws IOException {
 		String partial = testCase.getPartials().get(name);
 		return new StringReader(partial);
