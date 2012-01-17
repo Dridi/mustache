@@ -16,6 +16,7 @@ On top of it, it has a nice integration to Spring Web MVC and shows fairly good 
 ## Usage
 
 The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to render a template as shown in the "chris" unit test :
+
 ```java
 public class ChrisTest {
 
@@ -42,3 +43,4 @@ public class ChrisTest {
   
 }
 ```
+
