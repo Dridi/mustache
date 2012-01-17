@@ -11,7 +11,7 @@ This implementation is v1.1.2 compliant but doesn't support lambdas (maybe with 
 * a rendering API to merge a _processor_ with actual _data_
 * the Mustache class facility you can extend
 
-On top of it, it has a nice integration to Spring Web MVC and shows fairly good performance.
+On top of it, it has a nice integration to [Spring Web MVC](http://github.com/SpringSource/spring-framework/tree/3.1.x/org.springframework.web.servlet) and shows fairly good performance.
 
 ## Usage
 
