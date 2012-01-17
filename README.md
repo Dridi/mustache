@@ -1,8 +1,8 @@
-h1. Mustache
+# Mustache
 
-This is another _Java_ implementation of the "Mustache":http://mustache.github.com/ templating language. It focuses on text rendering with the least possible coupling to the business logic, ensuring a good separation of concerns.
+This is another _Java_ implementation of the [Mustache](http://mustache.github.com/) templating language. Mustache focuses on text rendering with the least possible coupling to the business logic, ensuring a good separation of concerns.
 
-h2. Features
+## Features
 
 This implementation is v1.1.2 compliant but doesn't support lambdas (maybe with java 8 ?). It's written with separation of concerns in mind and offers the following features :
 
@@ -13,10 +13,11 @@ This implementation is v1.1.2 compliant but doesn't support lambdas (maybe with 
 
 On top of it, it has a nice integration to Spring Web MVC and shows fairly good performance.
 
-h2. Usage
+## Usage
 
 The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to render a template as shown in the "chris" unit test :
-<pre><code class="java">public class ChrisTest {
+```java
+public class ChrisTest {
 
   String template = "Hello {{name}}\nYou have just won ${{value}}!\n{{#in_ca}}\nWell, ${{taxed_value}}, after taxes.\n{{/in_ca}}\n";
   String expected = "Hello Chris\nYou have just won $10000!\nWell, $6000.0, after taxes.\n";
@@ -39,4 +40,5 @@ The easiest way is to extend the _Mustache_ class. It has out-of-the-box API to 
     Assert.assertEquals(expected, result.toString());
   }
   
-}</code></pre>
+}
+```
