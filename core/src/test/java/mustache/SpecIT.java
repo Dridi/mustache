@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class SpecTest implements PartialLoader {
+public class SpecIT implements PartialLoader {
 	
 	private static final String[] TEST_SUITE_PATHS = {
 		"mustache/comments.json",
@@ -34,7 +34,7 @@ public class SpecTest implements PartialLoader {
 	
 	private SpecTestCase testCase;
 	
-	public SpecTest(SpecTestCase testCase) {
+	public SpecIT(SpecTestCase testCase) {
 		this.testCase = testCase;
 	}
 	
